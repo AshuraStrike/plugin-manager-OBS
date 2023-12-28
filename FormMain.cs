@@ -39,6 +39,7 @@ namespace PluginManagerObs
                     buttonReload.PerformClick();
                 }
                 labelObsPath.Text = controllerPlugins.getObsPath();
+                controllerPlugins.savePaths();
             }
         }
 
