@@ -8,17 +8,13 @@ using System.Threading.Tasks;
 
 namespace PluginManagerObs.Models
 {
-    public class Plugin
+    public class OBSPath
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int PluginId { get; set; }
-        public string Name { get; set; }
-        public bool IsInstalled { get; set; }
-        public long InstalledDate { get; set; }
         public int OBSPathId { get; set; }
-        [ForeignKey("OBSPathId")]
+        public string Path { get; set; }
 
-        public virtual OBSPath OBSPath { get; set; }
+        public virtual ICollection<Plugin> Plugins { get; set; }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection.Metadata.Ecma335;
+using Microsoft.EntityFrameworkCore;
 using PluginManagerObs.Models;
 using Tomlyn;
 
@@ -8,7 +10,7 @@ namespace PluginManagerObs.Classes
 {
     internal class ControllerPlugins
     {
-        public string obsPath;
+        private OBSPath obsPath;
         public string pluginsPath;
         public List<Plugin> listPlugins;
 
@@ -17,7 +19,10 @@ namespace PluginManagerObs.Classes
         private PluginsContext dbHandler;
         public ControllerPlugins()
         {
-            obsPath = string.Empty;
+            obsPath = new()
+            {
+                Path = string.Empty
+            };
             pluginsPath = string.Empty;
 
             listPlugins = new();
@@ -25,6 +30,23 @@ namespace PluginManagerObs.Classes
 
             dbHandler = new();
             dbHandler.Database.EnsureCreatedAsync().Wait();
+        }
+
+        public bool setObsPath(string obsPath_)
+        {
+            var query = dbHandler.OBSPaths.Where(o => o.Path == obsPath_);
+            Debug.WriteLine($"Query contents: {query.Count()}");
+            if(query.Count() == 0 )
+            {
+                obsPath.Path = obsPath_;
+                dbHandler.OBSPaths.Add(obsPath);
+                dbHandler.SaveChanges();
+            }
+            else
+            {
+                obsPath = query.First();
+            }
+            return true;
         }
 
         public bool populatePlugins()
@@ -55,9 +77,27 @@ namespace PluginManagerObs.Classes
                     {
                         Name = simpleName
                     };
-                    listPlugins.Add(p);
+                    //listPlugins.Add(p);
                     listPluginsFull.Add(p);
                 }
+            }
+
+            var query = dbHandler.Plugins.Where(p => p.OBSPathId == obsPath.OBSPathId);
+            for (int i = 0;i<listPluginsFull.Count;i++)
+            {
+                foreach (Plugin plu in query)
+                {
+                    if (listPluginsFull[i].Name == plu.Name)
+                    {
+                        /*plug.PluginId = plu.PluginId;
+                        plug.IsInstalled = plu.IsInstalled;
+                        plug.InstalledDate = plu.InstalledDate;
+                        plug.OBSPath = plu.OBSPath;*/
+                        listPluginsFull[i] = plu;
+                        break;
+                    }
+                }
+                listPlugins.Add(listPluginsFull[i]);
             }
             return true;
         }
@@ -67,7 +107,7 @@ namespace PluginManagerObs.Classes
             try
             {
                 // Check if already exists
-                if (obsPath == string.Empty && pluginsPath == string.Empty) return false;
+                if (obsPath.Path == string.Empty && pluginsPath == string.Empty) return false;
                 string name = $"{name_}.zip";
                 using (ZipArchive zip = ZipFile.Open(pluginsPath + name, ZipArchiveMode.Read))
                 {
@@ -77,9 +117,9 @@ namespace PluginManagerObs.Classes
 
                         if (zipEntry.FullName.Last<char>() == '/')
                         {
-                            if (!Directory.Exists(obsPath + zipWin))
+                            if (!Directory.Exists(obsPath.Path + zipWin))
                             {
-                                Directory.CreateDirectory(obsPath + zipWin);
+                                Directory.CreateDirectory(obsPath.Path + zipWin);
                             }
                         }
                         else
@@ -91,22 +131,29 @@ namespace PluginManagerObs.Classes
                             {
                                 justPath += path[i] + '\\';
                             }
-                            if (!Directory.Exists(obsPath + justPath))
+                            if (!Directory.Exists(obsPath.Path + justPath))
                             {
-                                Directory.CreateDirectory(obsPath + justPath);
+                                Directory.CreateDirectory(obsPath.Path + justPath);
                             }
-                            zipEntry.ExtractToFile(obsPath + zipWin);
+                            zipEntry.ExtractToFile(obsPath.Path + zipWin);
                         }
                     }
                 }
-                foreach (Plugin p in listPlugins)
+                Plugin plugin = new();
+                for (int i=0; i<listPlugins.Count; i++)
                 {
-                    if (p.Name == name_)
+                    if (listPlugins[i].Name == name_)
                     {
-                        p.IsInstalled = true;
+                        plugin = listPlugins[i];
+                        plugin.IsInstalled = true;
+                        plugin.IsInstalled = true;
+                        plugin.InstalledDate = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
+                        plugin.OBSPathId = obsPath.OBSPathId;
                         break;
                     }
                 }
+                dbHandler.Add(plugin);
+                dbHandler.SaveChanges();
             }catch (Exception e)
             {
                 Debug.Write("IO Exception, while adding plugin "+ name_ + e.ToString());
@@ -147,28 +194,36 @@ namespace PluginManagerObs.Classes
                             pluginFolder = ss;
                         }
                         string zipWin = zipEntry.FullName.Replace('/', '\\');
-                        if (File.Exists(obsPath + zipWin))
-                            File.Delete(obsPath + zipWin);
+                        if (File.Exists(obsPath.Path + zipWin))
+                            File.Delete(obsPath.Path + zipWin);
                     }
                 }
-                if (Directory.Exists(obsPath + dpPath + pluginFolder))
-                    Directory.Delete(obsPath +dpPath+ pluginFolder,true);
+                if (Directory.Exists(obsPath.Path + dpPath + pluginFolder))
+                    Directory.Delete(obsPath.Path + dpPath+ pluginFolder,true);
             }
             foreach (Plugin p in listPlugins)
             {
                 if (p.Name == name_)
                 {
                     p.IsInstalled = false;
+                    p.InstalledDate = 0;
+                    var query = dbHandler.Plugins.Where(plugin => plugin.Name == name_ && plugin.OBSPathId == obsPath.OBSPathId);
+                    if (query.Count() > 0)
+                    {
+                        dbHandler.Plugins.Remove(p);
+                        dbHandler.SaveChanges();
+                    }
                     break;
                 }
             }
+
             return true;
         }
 
         // Private, later
         public void vanityRemoval()
         {
-            vanityCheck(obsPath,0);
+            vanityCheck(obsPath.Path,0);
         }
 
         private void vanityCheck(string path,int tabs)
@@ -225,8 +280,11 @@ namespace PluginManagerObs.Classes
                 }
                 var model = Toml.ToModel(toml);
 
-                obsPath = (string)model["obspath"];
-                obsPath = obsPath.Replace('/', '\\');
+                string obsPath_ = (string)model["obspath"];
+                obsPath_ = obsPath_.Replace('/', '\\');
+
+                setObsPath(obsPath_);
+
                 pluginsPath = (string)model["pluginspath"];
                 pluginsPath = pluginsPath.Replace('/', '\\');
                 return true;
@@ -237,7 +295,7 @@ namespace PluginManagerObs.Classes
         public bool savePaths()
         {
             string settings = "settings.tml";
-            string toml = $"obspath = \"{obsPath.Replace('\\', '/')}\"\n";
+            string toml = $"obspath = \"{obsPath.Path.Replace('\\', '/')}\"\n";
             toml += $"pluginspath = \"{pluginsPath.Replace('\\', '/')}\"";
 
             using (StreamWriter sw = new StreamWriter(settings))
@@ -253,6 +311,8 @@ namespace PluginManagerObs.Classes
             if(File.Exists(obsPath + @"bin\64bit\obs64.exe") || File.Exists(obsPath + @"bin\32bit\obs.exe")) exists = true;
             return exists;
         }
+
+        public string getObsPath() => obsPath.Path;
     }
 }
 

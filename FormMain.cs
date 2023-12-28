@@ -23,19 +23,22 @@ namespace PluginManagerObs
                 if (controllerPlugins.validateObsPath(selectedPath))
                 {
                     Debug.WriteLine($"OBS found");
-                    controllerPlugins.obsPath = selectedPath;
+                    controllerPlugins.setObsPath(selectedPath);
                 }
                 else
                 {
                     Debug.WriteLine("Not OBS");
-                    DialogResult result2 = MessageBox.Show("Want to use it anyways?", "Not OBS directory", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
-                    if(result2 == DialogResult.Yes)
+                    DialogResult result2 = MessageBox.Show("Want to use it anyways?", "Not OBS directory", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result2 == DialogResult.Yes)
                     {
-                        controllerPlugins.obsPath = selectedPath;
+                        controllerPlugins.setObsPath(selectedPath);
                     }
                 }
-                labelObsPath.Text = controllerPlugins.obsPath;
-                controllerPlugins.savePaths();
+                if(controllerPlugins.pluginsPath!=string.Empty)
+                {
+                    buttonReload.PerformClick();
+                }
+                labelObsPath.Text = controllerPlugins.getObsPath();
             }
         }
 
@@ -55,7 +58,7 @@ namespace PluginManagerObs
         {
             if (controllerPlugins.loadPaths())
             {
-                labelObsPath.Text = controllerPlugins.obsPath;
+                labelObsPath.Text = controllerPlugins.getObsPath();
                 labelPluginsPath.Text = controllerPlugins.pluginsPath;
                 controllerPlugins.populatePlugins();
                 PopulateListViewPlugins();
@@ -87,7 +90,7 @@ namespace PluginManagerObs
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             // Enable multi-Pick
-            if (controllerPlugins.obsPath == string.Empty)
+            if (controllerPlugins.getObsPath() == string.Empty)
             {
                 MessageBox.Show("OBS path not set", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -100,7 +103,7 @@ namespace PluginManagerObs
                 else
                 {
                     ListViewItem lvi = listViewPlugins.SelectedItems[0];
-                    Debug.WriteLine(lvi.Text);
+                    Debug.WriteLine($"Plugin to add: {lvi.Text}");
                     if (controllerPlugins.addPlugins(lvi.Text))
                     {
                         listViewPlugins.Items.Clear();
@@ -127,6 +130,10 @@ namespace PluginManagerObs
 
                 lvi.SubItems.Add(status);
                 lvi.SubItems[1].BackColor = bgColor;
+                if (p.InstalledDate > 0)
+                {
+                    lvi.SubItems.Add(DateTimeOffset.FromUnixTimeMilliseconds(p.InstalledDate).LocalDateTime.ToString());
+                }
                 listViewPlugins.Items.Add(lvi);
             }
         }
@@ -134,7 +141,7 @@ namespace PluginManagerObs
         private void buttonRemove_Click(object sender, EventArgs e)
         {
             // Enable multi-Pick
-            if (controllerPlugins.obsPath == string.Empty)
+            if (controllerPlugins.getObsPath() == string.Empty)
             {
                 MessageBox.Show("OBS path not set", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

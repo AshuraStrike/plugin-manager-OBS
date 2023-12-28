@@ -42,6 +42,7 @@
             buttonAdd = new Button();
             buttonRemove = new Button();
             labelSign = new Label();
+            columnHeaderDate = new ColumnHeader();
             SuspendLayout();
             // 
             // buttonObsPath
@@ -85,7 +86,7 @@
             // listViewPlugins
             // 
             listViewPlugins.BackColor = SystemColors.ControlDark;
-            listViewPlugins.Columns.AddRange(new ColumnHeader[] { columnHeaderName, columnHeaderStatus });
+            listViewPlugins.Columns.AddRange(new ColumnHeader[] { columnHeaderName, columnHeaderStatus, columnHeaderDate });
             listViewPlugins.FullRowSelect = true;
             listViewPlugins.Location = new Point(12, 41);
             listViewPlugins.MultiSelect = false;
@@ -162,6 +163,11 @@
             labelSign.TabIndex = 10;
             labelSign.Text = "AshuraStrike 2023";
             // 
+            // columnHeaderDate
+            // 
+            columnHeaderDate.Text = "Date";
+            columnHeaderDate.Width = 180;
+            // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -202,5 +208,6 @@
         private ColumnHeader columnHeaderStatus;
         private Button buttonRemove;
         private Label labelSign;
+        private ColumnHeader columnHeaderDate;
     }
 }
