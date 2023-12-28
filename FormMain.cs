@@ -77,7 +77,7 @@ namespace PluginManagerObs
             }
             else
             {
-                MessageBox.Show("Set the Plugins path", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Set/Change the Plugins path", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

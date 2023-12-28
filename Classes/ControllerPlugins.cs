@@ -38,7 +38,7 @@ namespace PluginManagerObs.Classes
             Debug.WriteLine($"Query contents: {query.Count()}");
             if(query.Count() == 0 )
             {
-                obsPath.Path = obsPath_;
+                obsPath = new() { Path = obsPath_ };
                 dbHandler.OBSPaths.Add(obsPath);
                 dbHandler.SaveChanges();
             }
@@ -58,27 +58,31 @@ namespace PluginManagerObs.Classes
             // Validate plugin zips
             foreach (string file in Directory.EnumerateFiles(pluginsPath))
             {
-                bool data = false, plugins = false;
-                using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
+                string extension = file.Substring(file.Length - 3, 3);
+                if (extension == "zip")
                 {
-                    foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                    bool data = false, plugins = false;
+                    using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
                     {
-                        if (zipEntry.ToString().Contains("data/")) data = true;
-                        if (zipEntry.ToString().Contains("obs-plugins/")) plugins = true;
+                        foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                        {
+                            if (zipEntry.ToString().Contains("data/")) data = true;
+                            if (zipEntry.ToString().Contains("obs-plugins/")) plugins = true;
+                        }
                     }
-                }
-                if (data && plugins)
-                {
-                    string[] splitName = file.Split('\\');
-                    string simpleName = splitName[splitName.Length - 1];
-                    simpleName = simpleName.Substring(0, simpleName.Length - 4);
-                    // Add validated zips
-                    Plugin p = new()
+                    if (data && plugins)
                     {
-                        Name = simpleName
-                    };
-                    //listPlugins.Add(p);
-                    listPluginsFull.Add(p);
+                        string[] splitName = file.Split('\\');
+                        string simpleName = splitName[splitName.Length - 1];
+                        simpleName = simpleName.Substring(0, simpleName.Length - 4);
+                        // Add validated zips
+                        Plugin p = new()
+                        {
+                            Name = simpleName
+                        };
+                        //listPlugins.Add(p);
+                        listPluginsFull.Add(p);
+                    }
                 }
             }
 
