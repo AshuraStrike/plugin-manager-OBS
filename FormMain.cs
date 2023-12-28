@@ -1,4 +1,5 @@
 using PluginManagerObs.Classes;
+using PluginManagerObs.Models;
 using System.Diagnostics;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -18,8 +19,21 @@ namespace PluginManagerObs
             DialogResult result = folderBrowserDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                // controllerPlugins -> validate OBS folder == Look for OBS bin
-                controllerPlugins.obsPath = folderBrowserDialog.SelectedPath + '\\';
+                string selectedPath = folderBrowserDialog.SelectedPath + '\\';
+                if (controllerPlugins.validateObsPath(selectedPath))
+                {
+                    Debug.WriteLine($"OBS found");
+                    controllerPlugins.obsPath = selectedPath;
+                }
+                else
+                {
+                    Debug.WriteLine("Not OBS");
+                    DialogResult result2 = MessageBox.Show("Want to use it anyways?", "Not OBS directory", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+                    if(result2 == DialogResult.Yes)
+                    {
+                        controllerPlugins.obsPath = selectedPath;
+                    }
+                }
                 labelObsPath.Text = controllerPlugins.obsPath;
                 controllerPlugins.savePaths();
             }
@@ -104,11 +118,11 @@ namespace PluginManagerObs
                 lvi.UseItemStyleForSubItems = false;
 
                 string status = "Not Installed";
-                Color bgColor = Color.Red;
+                Color bgColor = Color.FromArgb(unchecked((int)0xFF2b5797));
                 if (p.IsInstalled)
                 {
                     status = "Installed";
-                    bgColor = Color.Green;
+                    bgColor = Color.FromArgb(unchecked((int)0xFF1e7145));
                 }
 
                 lvi.SubItems.Add(status);

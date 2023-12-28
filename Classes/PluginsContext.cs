@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PluginManagerObs.Models;
 
 namespace PluginManagerObs.Classes
 {

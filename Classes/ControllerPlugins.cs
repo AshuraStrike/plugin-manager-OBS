@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
+using PluginManagerObs.Models;
 using Tomlyn;
 
 namespace PluginManagerObs.Classes
@@ -30,18 +32,32 @@ namespace PluginManagerObs.Classes
             if (pluginsPath == string.Empty) return false;
             listPlugins.Clear();
             listPluginsFull.Clear();
+
+            // Validate plugin zips
             foreach (string file in Directory.EnumerateFiles(pluginsPath))
             {
-                // Validate plugin zips
-                string[] splitName = file.Split('\\');
-                string simpleName = splitName[splitName.Length - 1];
-                simpleName = simpleName.Substring(0, simpleName.Length - 4);
-                // Add validated zips
-                Plugin p = new() {
-                    Name = simpleName
-                };
-                listPlugins.Add(p);
-                listPluginsFull.Add(p);
+                bool data = false, plugins = false;
+                using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
+                {
+                    foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                    {
+                        if (zipEntry.ToString().Contains("data/")) data = true;
+                        if (zipEntry.ToString().Contains("obs-plugins/")) plugins = true;
+                    }
+                }
+                if (data && plugins)
+                {
+                    string[] splitName = file.Split('\\');
+                    string simpleName = splitName[splitName.Length - 1];
+                    simpleName = simpleName.Substring(0, simpleName.Length - 4);
+                    // Add validated zips
+                    Plugin p = new()
+                    {
+                        Name = simpleName
+                    };
+                    listPlugins.Add(p);
+                    listPluginsFull.Add(p);
+                }
             }
             return true;
         }
@@ -127,14 +143,16 @@ namespace PluginManagerObs.Classes
                                 }
                             }
                             string ss = fullName.Substring(17, end - 17);
-                            Debug.WriteLine(ss);
+                            Debug.WriteLine($"Substring plugin name: {ss}");
                             pluginFolder = ss;
                         }
                         string zipWin = zipEntry.FullName.Replace('/', '\\');
-                        File.Delete(obsPath + zipWin);
+                        if (File.Exists(obsPath + zipWin))
+                            File.Delete(obsPath + zipWin);
                     }
                 }
-                Directory.Delete(obsPath +dpPath+ pluginFolder,true);
+                if (Directory.Exists(obsPath + dpPath + pluginFolder))
+                    Directory.Delete(obsPath +dpPath+ pluginFolder,true);
             }
             foreach (Plugin p in listPlugins)
             {
@@ -164,20 +182,20 @@ namespace PluginManagerObs.Classes
             if (files.Count() == 0 && directories.Count() == 0)
             {
                 Directory.Delete(path,false);
-                Debug.WriteLine($"{path} DELETED!");
+                Debug.WriteLine($"Vanity {path} DELETED!");
             }
             else
             {
                 foreach (string dir in directories)
                 {
-                    Debug.WriteLine($"{space}{dir}");
+                    Debug.WriteLine($"Vanity check dir: {space}{dir}");
                     vanityCheck(dir, tabs + 1);
                 }
                 var entries = Directory.EnumerateFileSystemEntries(path);
                 if(entries.Count() == 0)
                 {
                     Directory.Delete(path, false);
-                    Debug.WriteLine($"{path} DELETED!");
+                    Debug.WriteLine($"Vanity {path} DELETED!");
                 }
             }
         }
@@ -227,6 +245,13 @@ namespace PluginManagerObs.Classes
                 sw.Write(toml);
             }
             return true;
+        }
+
+        public bool validateObsPath(string obsPath)
+        {
+            bool exists = false;
+            if(File.Exists(obsPath + @"bin\64bit\obs64.exe") || File.Exists(obsPath + @"bin\32bit\obs.exe")) exists = true;
+            return exists;
         }
     }
 }
