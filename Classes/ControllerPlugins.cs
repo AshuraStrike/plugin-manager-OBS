@@ -187,7 +187,8 @@ namespace PluginManagerObs.Classes
                             try
                             {
                                 File.Delete(obsPath.Path + zipWin);
-                            }catch (IOException e)
+                            }catch (Exception e) when (e is IOException ||
+                                                       e is UnauthorizedAccessException)
                             {
                                 Debug.WriteLine($"Error deleting file {zipWin}: {e}");
                                 return false;
@@ -226,7 +227,6 @@ namespace PluginManagerObs.Classes
 
         public bool copyPluginZip(string file)
         {
-            if(pluginsPath == string.Empty) return false;
             string extension = file.Substring(file.Length - 3, 3);
             if (extension == "zip")
             {

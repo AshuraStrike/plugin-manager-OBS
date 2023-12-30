@@ -189,11 +189,11 @@
             // 
             labelDrop.AutoSize = true;
             labelDrop.Font = new Font("Consolas", 27.75F, FontStyle.Regular, GraphicsUnit.Point);
-            labelDrop.Location = new Point(155, 200);
+            labelDrop.Location = new Point(128, 200);
             labelDrop.Name = "labelDrop";
-            labelDrop.Size = new Size(299, 43);
+            labelDrop.Size = new Size(339, 43);
             labelDrop.TabIndex = 0;
-            labelDrop.Text = "Drop to CANCEL";
+            labelDrop.Text = "Drop files here!";
             labelDrop.Visible = false;
             // 
             // FormMain
@@ -202,7 +202,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
-            ClientSize = new Size(714, 569);
+            ClientSize = new Size(714, 566);
             Controls.Add(panelDragnDrop);
             Controls.Add(labelSign);
             Controls.Add(buttonRemove);
@@ -215,6 +215,8 @@
             Controls.Add(labelObsPath);
             Controls.Add(buttonPluginsPath);
             Controls.Add(buttonObsPath);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
             Name = "FormMain";
             Text = "Plugin Manager for OBS";
             Load += FormMain_Load;

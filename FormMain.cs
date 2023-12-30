@@ -110,6 +110,10 @@ namespace PluginManagerObs
                         listViewPlugins.Items.Clear();
                         PopulateListViewPlugins();
                     }
+                    else
+                    {
+                        MessageBox.Show($"Could not add {lvi.Text}\nOther version might be already installed", "Could not add", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
         }
@@ -161,23 +165,34 @@ namespace PluginManagerObs
                         listViewPlugins.Items.Clear();
                         PopulateListViewPlugins();
                     }
+                    else
+                    {
+                        MessageBox.Show($"Could not remove {lvi.Text}\nIs OBS running?", "Could not remove", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
         }
 
         private void panelDragnDrop_DragDrop(object sender, DragEventArgs e)
         {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            foreach (string file in files)
+            if (controllerPlugins.pluginsPath == string.Empty)
             {
-                Debug.WriteLine(file);
-                if (!controllerPlugins.copyPluginZip(file))
-                {
-                    MessageBox.Show($"Could not copy file {file}","Could not copy",MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                MessageBox.Show("Set/Change the Plugins path", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            //Refresh
-            buttonReload.PerformClick();
+            else
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+                foreach (string file in files)
+                {
+                    Debug.WriteLine(file);
+                    if (!controllerPlugins.copyPluginZip(file))
+                    {
+                        MessageBox.Show($"Could not copy file {file}", "Could not copy", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                //Refresh
+                buttonReload.PerformClick();
+            }
             panelDragnDrop.Visible = false;
         }
 
