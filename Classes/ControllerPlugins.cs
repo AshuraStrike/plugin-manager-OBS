@@ -169,6 +169,7 @@ namespace PluginManagerObs.Classes
         public bool uninstallPlugin(string name_)
         {
             // Exception ret false
+            // TODO OBS is open cant remove, check if file is locked, if locked abort
             string name = $"{name_}.zip";
             string pluginFolder = string.Empty;
             string dpPath = "data/obs-plugins/";
