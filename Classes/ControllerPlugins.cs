@@ -61,16 +61,7 @@ namespace PluginManagerObs.Classes
                 if (extension == "zip")
                 {
                     // Validate plugin zips
-                    bool data = false, plugins = false;
-                    using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
-                    {
-                        foreach (ZipArchiveEntry zipEntry in zip.Entries)
-                        {
-                            if (zipEntry.ToString().Contains("data/")) data = true;
-                            if (zipEntry.ToString().Contains("obs-plugins/")) plugins = true;
-                        }
-                    }
-                    if (data && plugins)
+                    if (validateZip(file))
                     {
                         string[] splitName = file.Split('\\');
                         string simpleName = splitName[splitName.Length - 1];
@@ -244,12 +235,19 @@ namespace PluginManagerObs.Classes
                 // TODO Check valid plugin before copy
                 try
                 {
-                    File.Copy(file, pluginsPath + nameAndExtension);
+                    if (validateZip(file))
+                        File.Copy(file, pluginsPath + nameAndExtension);
+                    else
+                        return false;
                 }catch (IOException e)
                 {
                     Debug.WriteLine($"Could not copy file {nameAndExtension} : " + e.ToString());
                     return false;
                 }
+            }
+            else
+            {
+                return false;
             }
             return true;
         }
@@ -287,6 +285,20 @@ namespace PluginManagerObs.Classes
                     Debug.WriteLine($"Vanity {path} DELETED!");
                 }
             }
+        }
+
+        public bool validateZip(string file)
+        {
+            bool data = false, plugins = false;
+            using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
+            {
+                foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                {
+                    if (zipEntry.ToString().Contains("data/")) data = true;
+                    if (zipEntry.ToString().Contains("obs-plugins/")) plugins = true;
+                }
+            }
+            return (data && plugins);
         }
 
         public void filterPlugins(string text)

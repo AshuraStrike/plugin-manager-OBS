@@ -171,7 +171,10 @@ namespace PluginManagerObs
             foreach (string file in files)
             {
                 Debug.WriteLine(file);
-                controllerPlugins.copyPluginZip(file);
+                if (!controllerPlugins.copyPluginZip(file))
+                {
+                    MessageBox.Show($"Could not copy file {file}","Could not copy",MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             //Refresh
             buttonReload.PerformClick();
