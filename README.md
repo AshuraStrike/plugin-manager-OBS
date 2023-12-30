@@ -7,16 +7,16 @@ The objective is to be able to keep track of the Plugins that you have installed
 ## Features
 
 * Manage your plugins in your OBS folder
-* Add and remove plugins to your liking
+* Add and remove plugins
 * Update or switch plugin versions in just a few clicks
 * Multiple OBS folders can be tracked
 * Drag and drop files to add them to your plugins folder
 
 ## Installation
 
-1. Download the lastest zip file from [releases]
+1. Download the lastest zip file here [releases]
 
-1. Currently we only provide a zip/portable application so... Unpack the zip contents on a folder of your liking, optionally create a shortcut on your desktop
+1. Unpack the zip contents in a folder of your choosing, optionally create a shortcut for the exe file on your desktop
 
 1. The app will require you to have .net core 7 runtime, Don't have it? No worries, the app will send you to a link where you can download it
 
@@ -42,6 +42,8 @@ If a plugin is found in to be installed the app will show it's status as Install
 
 Add and remove plugins from your OBS install path freely, remove will only remove them from the OBS path
 
+Plugins can be added by drag and drop on the plugin list, cancel releasing click outside the list
+
 You can switch to a different OBS path too, all your changes will be there once you get back to your original OBS path
 
 ## Planned additions
@@ -60,4 +62,4 @@ Bugs and missing notifications reports are welcome, feature request is allowed t
 
 I made this app for me but I hope it will be useful to you too
 
-[releases]: https://github.com/AshuraStrike/plugin-manager-OBS/releases "releases"
+[releases]: https://github.com/AshuraStrike/plugin-manager-OBS/releases "plugin-manager-OBS/releases"
