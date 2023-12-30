@@ -55,12 +55,12 @@ namespace PluginManagerObs.Classes
             listPlugins.Clear();
             listPluginsFull.Clear();
 
-            // Validate plugin zips
             foreach (string file in Directory.EnumerateFiles(pluginsPath))
             {
                 string extension = file.Substring(file.Length - 3, 3);
                 if (extension == "zip")
                 {
+                    // Validate plugin zips
                     bool data = false, plugins = false;
                     using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
                     {
@@ -80,7 +80,6 @@ namespace PluginManagerObs.Classes
                         {
                             Name = simpleName
                         };
-                        //listPlugins.Add(p);
                         listPluginsFull.Add(p);
                     }
                 }
@@ -93,10 +92,6 @@ namespace PluginManagerObs.Classes
                 {
                     if (listPluginsFull[i].Name == plu.Name)
                     {
-                        /*plug.PluginId = plu.PluginId;
-                        plug.IsInstalled = plu.IsInstalled;
-                        plug.InstalledDate = plu.InstalledDate;
-                        plug.OBSPath = plu.OBSPath;*/
                         listPluginsFull[i] = plu;
                         break;
                     }
@@ -110,8 +105,8 @@ namespace PluginManagerObs.Classes
         {
             try
             {
-                // Check if already exists
                 if (obsPath.Path == string.Empty && pluginsPath == string.Empty) return false;
+                // Check if already exists
                 string name = $"{name_}.zip";
                 using (ZipArchive zip = ZipFile.Open(pluginsPath + name, ZipArchiveMode.Read))
                 {
@@ -168,8 +163,6 @@ namespace PluginManagerObs.Classes
 
         public bool uninstallPlugin(string name_)
         {
-            // Exception ret false
-            // TODO OBS is open cant remove, check if file is locked, if locked abort
             string name = $"{name_}.zip";
             string pluginFolder = string.Empty;
             string dpPath = "data/obs-plugins/";
@@ -200,11 +193,26 @@ namespace PluginManagerObs.Classes
                         }
                         string zipWin = zipEntry.FullName.Replace('/', '\\');
                         if (File.Exists(obsPath.Path + zipWin))
-                            File.Delete(obsPath.Path + zipWin);
+                            try
+                            {
+                                File.Delete(obsPath.Path + zipWin);
+                            }catch (IOException e)
+                            {
+                                Debug.WriteLine($"Error deleting file {zipWin}: {e}");
+                                return false;
+                            }
                     }
                 }
                 if (Directory.Exists(obsPath.Path + dpPath + pluginFolder))
-                    Directory.Delete(obsPath.Path + dpPath+ pluginFolder,true);
+                    try
+                    {
+                        Directory.Delete(obsPath.Path + dpPath + pluginFolder, true);
+                    }
+                    catch (IOException e)
+                    {
+                        Debug.WriteLine($"Error deleting directory {pluginFolder}: {e}");
+                        return false;
+                    }
             }
             foreach (Plugin p in listPlugins)
             {
@@ -225,7 +233,28 @@ namespace PluginManagerObs.Classes
             return true;
         }
 
-        // Private, later
+        public bool copyPluginZip(string file)
+        {
+            if(pluginsPath == string.Empty) return false;
+            string extension = file.Substring(file.Length - 3, 3);
+            if (extension == "zip")
+            {
+                int separatorPos = file.LastIndexOf('\\') + 1;
+                string nameAndExtension = file.Substring(separatorPos, file.Length - separatorPos);
+                // TODO Check valid plugin before copy
+                try
+                {
+                    File.Copy(file, pluginsPath + nameAndExtension);
+                }catch (IOException e)
+                {
+                    Debug.WriteLine($"Could not copy file {nameAndExtension} : " + e.ToString());
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // TODO, remove? Private, later
         public void vanityRemoval()
         {
             vanityCheck(obsPath.Path,0);

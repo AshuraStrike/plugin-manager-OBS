@@ -34,7 +34,7 @@ namespace PluginManagerObs
                         controllerPlugins.setObsPath(selectedPath);
                     }
                 }
-                if(controllerPlugins.pluginsPath!=string.Empty)
+                if (controllerPlugins.pluginsPath != string.Empty)
                 {
                     buttonReload.PerformClick();
                 }
@@ -163,6 +163,54 @@ namespace PluginManagerObs
                     }
                 }
             }
+        }
+
+        private void panelDragnDrop_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            foreach (string file in files)
+            {
+                Debug.WriteLine(file);
+                controllerPlugins.copyPluginZip(file);
+            }
+            //Refresh
+            buttonReload.PerformClick();
+            panelDragnDrop.Visible = false;
+        }
+
+        private void panelDragnDrop_DragEnter(object sender, DragEventArgs e)
+        {
+            panelDragnDrop.Visible = true;
+            e.Effect = DragDropEffects.Copy;
+            labelDrop.Visible = true;
+            labelDrop.ForeColor = Color.Black;
+            labelDrop.Text = "Drop your files to copy!";
+            labelDrop.Location = new Point(60, 200);
+        }
+
+        private void panelDragnDrop_DragLeave(object sender, EventArgs e)
+        {
+            labelDrop.ForeColor = Color.DarkRed;
+            labelDrop.Text = "Drop to CANCEL";
+            labelDrop.Location = new Point(150, 200);
+        }
+
+        private void FormMain_DragDrop(object sender, DragEventArgs e)
+        {
+            panelDragnDrop.Visible = false;
+            labelDrop.Visible = false;
+        }
+
+        private void FormMain_DragOver(object sender, DragEventArgs e)
+        {
+            panelDragnDrop.Visible = true;
+            labelDrop.Visible = true;
+        }
+
+        private void FormMain_DragLeave(object sender, EventArgs e)
+        {
+            panelDragnDrop.Visible = false;
+            labelDrop.Visible = false;
         }
     }
 }

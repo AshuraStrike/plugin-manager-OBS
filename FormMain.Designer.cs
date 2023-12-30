@@ -36,13 +36,16 @@
             listViewPlugins = new ListView();
             columnHeaderName = new ColumnHeader();
             columnHeaderStatus = new ColumnHeader();
+            columnHeaderDate = new ColumnHeader();
             textBoxSearch = new TextBox();
             buttonSearch = new Button();
             buttonReload = new Button();
             buttonAdd = new Button();
             buttonRemove = new Button();
             labelSign = new Label();
-            columnHeaderDate = new ColumnHeader();
+            panelDragnDrop = new Panel();
+            labelDrop = new Label();
+            panelDragnDrop.SuspendLayout();
             SuspendLayout();
             // 
             // buttonObsPath
@@ -106,6 +109,11 @@
             columnHeaderStatus.Text = "Status";
             columnHeaderStatus.Width = 80;
             // 
+            // columnHeaderDate
+            // 
+            columnHeaderDate.Text = "Date";
+            columnHeaderDate.Width = 180;
+            // 
             // textBoxSearch
             // 
             textBoxSearch.Location = new Point(12, 12);
@@ -163,17 +171,39 @@
             labelSign.TabIndex = 10;
             labelSign.Text = "AshuraStrike 2023";
             // 
-            // columnHeaderDate
+            // panelDragnDrop
             // 
-            columnHeaderDate.Text = "Date";
-            columnHeaderDate.Width = 180;
+            panelDragnDrop.AllowDrop = true;
+            panelDragnDrop.BackColor = SystemColors.ControlDark;
+            panelDragnDrop.Controls.Add(labelDrop);
+            panelDragnDrop.Location = new Point(12, 41);
+            panelDragnDrop.Name = "panelDragnDrop";
+            panelDragnDrop.Size = new Size(609, 458);
+            panelDragnDrop.TabIndex = 11;
+            panelDragnDrop.Visible = false;
+            panelDragnDrop.DragDrop += panelDragnDrop_DragDrop;
+            panelDragnDrop.DragEnter += panelDragnDrop_DragEnter;
+            panelDragnDrop.DragLeave += panelDragnDrop_DragLeave;
+            // 
+            // labelDrop
+            // 
+            labelDrop.AutoSize = true;
+            labelDrop.Font = new Font("Consolas", 27.75F, FontStyle.Regular, GraphicsUnit.Point);
+            labelDrop.Location = new Point(155, 200);
+            labelDrop.Name = "labelDrop";
+            labelDrop.Size = new Size(299, 43);
+            labelDrop.TabIndex = 0;
+            labelDrop.Text = "Drop to CANCEL";
+            labelDrop.Visible = false;
             // 
             // FormMain
             // 
+            AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(714, 569);
+            Controls.Add(panelDragnDrop);
             Controls.Add(labelSign);
             Controls.Add(buttonRemove);
             Controls.Add(buttonAdd);
@@ -188,6 +218,11 @@
             Name = "FormMain";
             Text = "Plugin Manager for OBS";
             Load += FormMain_Load;
+            DragDrop += FormMain_DragDrop;
+            DragOver += FormMain_DragOver;
+            DragLeave += FormMain_DragLeave;
+            panelDragnDrop.ResumeLayout(false);
+            panelDragnDrop.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -209,5 +244,7 @@
         private Button buttonRemove;
         private Label labelSign;
         private ColumnHeader columnHeaderDate;
+        private Panel panelDragnDrop;
+        private Label labelDrop;
     }
 }
