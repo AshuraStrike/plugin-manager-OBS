@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             buttonObsPath = new Button();
             buttonPluginsPath = new Button();
             labelObsPath = new Label();
@@ -216,6 +217,7 @@
             Controls.Add(buttonPluginsPath);
             Controls.Add(buttonObsPath);
             FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "FormMain";
             Text = "Plugin Manager for OBS";

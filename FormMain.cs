@@ -182,12 +182,15 @@ namespace PluginManagerObs
             else
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-                foreach (string file in files)
+                if (files != null)
                 {
-                    Debug.WriteLine(file);
-                    if (!controllerPlugins.copyPluginZip(file))
+                    foreach (string file in files)
                     {
-                        MessageBox.Show($"Could not copy file {file}", "Could not copy", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        Debug.WriteLine(file);
+                        if (!controllerPlugins.copyPluginZip(file))
+                        {
+                            MessageBox.Show($"Could not copy file {file}", "Could not copy", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                 }
                 //Refresh
