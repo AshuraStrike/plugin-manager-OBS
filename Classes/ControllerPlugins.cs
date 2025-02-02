@@ -289,16 +289,14 @@ namespace PluginManagerObs.Classes
 
         public bool validateZip(string file)
         {
-            bool data = false, plugins = false;
             using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
             {
                 foreach (ZipArchiveEntry zipEntry in zip.Entries)
                 {
-                    if (zipEntry.ToString().Contains("data/")) data = true;
-                    if (zipEntry.ToString().Contains("obs-plugins/")) plugins = true;
+                    if (zipEntry.ToString().Contains("obs-plugins/")) return true;
                 }
             }
-            return (data && plugins);
+            return false;
         }
 
         public void filterPlugins(string text)
@@ -333,6 +331,10 @@ namespace PluginManagerObs.Classes
 
                 pluginsPath = (string)model["pluginspath"];
                 pluginsPath = pluginsPath.Replace('/', '\\');
+                if(!System.IO.Directory.Exists(pluginsPath))
+                {
+                    pluginsPath = string.Empty;
+                }
                 return true;
             }
             return false;

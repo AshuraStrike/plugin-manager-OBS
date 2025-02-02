@@ -61,8 +61,7 @@ namespace PluginManagerObs
             {
                 labelObsPath.Text = controllerPlugins.getObsPath();
                 labelPluginsPath.Text = controllerPlugins.pluginsPath;
-                controllerPlugins.populatePlugins();
-                PopulateListViewPlugins();
+                buttonReload.PerformClick();
             }
         }
 
