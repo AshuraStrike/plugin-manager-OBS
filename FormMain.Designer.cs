@@ -51,7 +51,7 @@
             // 
             // buttonObsPath
             // 
-            buttonObsPath.Location = new Point(12, 505);
+            buttonObsPath.Location = new Point(12, 323);
             buttonObsPath.Name = "buttonObsPath";
             buttonObsPath.Size = new Size(95, 23);
             buttonObsPath.TabIndex = 0;
@@ -61,7 +61,7 @@
             // 
             // buttonPluginsPath
             // 
-            buttonPluginsPath.Location = new Point(12, 534);
+            buttonPluginsPath.Location = new Point(12, 352);
             buttonPluginsPath.Name = "buttonPluginsPath";
             buttonPluginsPath.Size = new Size(95, 23);
             buttonPluginsPath.TabIndex = 1;
@@ -72,7 +72,7 @@
             // labelObsPath
             // 
             labelObsPath.AutoSize = true;
-            labelObsPath.Location = new Point(113, 509);
+            labelObsPath.Location = new Point(113, 327);
             labelObsPath.Name = "labelObsPath";
             labelObsPath.Size = new Size(73, 15);
             labelObsPath.TabIndex = 2;
@@ -81,7 +81,7 @@
             // labelPluginsPath
             // 
             labelPluginsPath.AutoSize = true;
-            labelPluginsPath.Location = new Point(113, 538);
+            labelPluginsPath.Location = new Point(113, 356);
             labelPluginsPath.Name = "labelPluginsPath";
             labelPluginsPath.Size = new Size(73, 15);
             labelPluginsPath.TabIndex = 3;
@@ -89,13 +89,13 @@
             // 
             // listViewPlugins
             // 
-            listViewPlugins.BackColor = SystemColors.ControlDark;
+            listViewPlugins.BackColor = SystemColors.Control;
             listViewPlugins.Columns.AddRange(new ColumnHeader[] { columnHeaderName, columnHeaderStatus, columnHeaderDate });
             listViewPlugins.FullRowSelect = true;
             listViewPlugins.Location = new Point(12, 41);
             listViewPlugins.MultiSelect = false;
             listViewPlugins.Name = "listViewPlugins";
-            listViewPlugins.Size = new Size(609, 458);
+            listViewPlugins.Size = new Size(609, 276);
             listViewPlugins.TabIndex = 4;
             listViewPlugins.UseCompatibleStateImageBehavior = false;
             listViewPlugins.View = View.Details;
@@ -166,7 +166,7 @@
             // 
             labelSign.AutoSize = true;
             labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic, GraphicsUnit.Point);
-            labelSign.Location = new Point(576, 544);
+            labelSign.Location = new Point(576, 362);
             labelSign.Name = "labelSign";
             labelSign.Size = new Size(126, 16);
             labelSign.TabIndex = 10;
@@ -175,11 +175,11 @@
             // panelDragnDrop
             // 
             panelDragnDrop.AllowDrop = true;
-            panelDragnDrop.BackColor = SystemColors.ControlDark;
+            panelDragnDrop.BackColor = SystemColors.Control;
             panelDragnDrop.Controls.Add(labelDrop);
             panelDragnDrop.Location = new Point(12, 41);
             panelDragnDrop.Name = "panelDragnDrop";
-            panelDragnDrop.Size = new Size(609, 458);
+            panelDragnDrop.Size = new Size(609, 276);
             panelDragnDrop.TabIndex = 11;
             panelDragnDrop.Visible = false;
             panelDragnDrop.DragDrop += panelDragnDrop_DragDrop;
@@ -190,7 +190,7 @@
             // 
             labelDrop.AutoSize = true;
             labelDrop.Font = new Font("Consolas", 27.75F, FontStyle.Regular, GraphicsUnit.Point);
-            labelDrop.Location = new Point(128, 200);
+            labelDrop.Location = new Point(130, 109);
             labelDrop.Name = "labelDrop";
             labelDrop.Size = new Size(339, 43);
             labelDrop.TabIndex = 0;
@@ -202,8 +202,8 @@
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ControlDarkDark;
-            ClientSize = new Size(714, 566);
+            BackColor = SystemColors.ControlLight;
+            ClientSize = new Size(714, 390);
             Controls.Add(panelDragnDrop);
             Controls.Add(labelSign);
             Controls.Add(buttonRemove);
