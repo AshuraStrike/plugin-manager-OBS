@@ -2,6 +2,8 @@
 using System.IO;
 using System.IO.Compression;
 using System.Reflection.Metadata.Ecma335;
+using System.Xml.Linq;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PluginManagerObs.Models;
 using Tomlyn;
@@ -10,13 +12,13 @@ namespace PluginManagerObs.Classes
 {
     internal class ControllerPlugins
     {
-        private OBSPath obsPath;
+        private DBOBSPathEntry obsPath;
         public string pluginsPath;
         public List<Plugin> listPlugins;
 
         private List<Plugin> listPluginsFull;
 
-        private PluginsContext dbHandler;
+        private DBPluginsContext dbHandler;
         public ControllerPlugins()
         {
             obsPath = new()
@@ -36,7 +38,7 @@ namespace PluginManagerObs.Classes
         {
             var query = dbHandler.OBSPaths.Where(o => o.Path == obsPath_);
             Debug.WriteLine($"Query contents: {query.Count()}");
-            if(query.Count() == 0 )
+            if (query.Count() == 0)
             {
                 obsPath = new() { Path = obsPath_ };
                 dbHandler.OBSPaths.Add(obsPath);
@@ -49,7 +51,7 @@ namespace PluginManagerObs.Classes
             return true;
         }
 
-        public bool populatePlugins()
+        public bool populatePluginLists()
         {
             if (pluginsPath == string.Empty) return false;
             listPlugins.Clear();
@@ -69,22 +71,58 @@ namespace PluginManagerObs.Classes
                         // Add validated zips
                         Plugin p = new()
                         {
-                            Name = simpleName
+                            Name = simpleName,
+                            Installed = PluginInstallationType.NOT_INSTALLED
                         };
                         listPluginsFull.Add(p);
                     }
                 }
             }
 
-            var query = dbHandler.Plugins.Where(p => p.OBSPathId == obsPath.OBSPathId);
-            for (int i = 0;i<listPluginsFull.Count;i++)
+            var pluginQuery = dbHandler.Plugins.Where(p => p.OBSPathId == obsPath.OBSPathId);
+            for (int i = 0; i < listPluginsFull.Count; i++)
             {
-                foreach (Plugin plu in query)
+                foreach (DBPluginEntry pluginQueryEle in pluginQuery)
                 {
-                    if (listPluginsFull[i].Name == plu.Name)
+                    if (listPluginsFull[i].Name == pluginQueryEle.Name)
                     {
-                        listPluginsFull[i] = plu;
+                        listPluginsFull[i].dbEntry = pluginQueryEle;
+                        listPluginsFull[i].Installed = listPluginsFull[i].dbEntry.IsInstalled ? PluginInstallationType.INSTALLED : PluginInstallationType.NOT_INSTALLED;
                         break;
+                    }
+                }
+                if (listPluginsFull[i].dbEntry == null)
+                {
+                    listPluginsFull[i].dbEntry = new()
+                    {
+                        Name = listPluginsFull[i].Name
+                    };
+                }
+                var temp = getPluginState(listPluginsFull[i].Name);
+                if (listPluginsFull[i].Installed == PluginInstallationType.INSTALLED)
+                {
+                    switch (temp)
+                    {
+                        case PluginInstallationStateType.NOT_INSTALLED:
+                        case PluginInstallationStateType.FILES_PRESENT:
+                            listPluginsFull[i].Installed = PluginInstallationType.INSTALLED_MODIFIED;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (temp)
+                    {
+                        case PluginInstallationStateType.FILES_PRESENT:
+                            listPluginsFull[i].Installed = PluginInstallationType.FILES_PRESENT;
+                            break;
+                        case PluginInstallationStateType.INSTALLED:
+                            listPluginsFull[i].Installed = PluginInstallationType.MANUALLY_INSTALLED;
+                            break;
+                        default:
+                            break;
                     }
                 }
                 listPlugins.Add(listPluginsFull[i]);
@@ -92,12 +130,62 @@ namespace PluginManagerObs.Classes
             return true;
         }
 
+        public PluginInstallationStateType getPluginState(string simpleName)
+        {
+            bool someFound = false;
+            bool allMatching = true;
+            using (ZipArchive zip = ZipFile.Open(pluginsPath + simpleName + ".zip", ZipArchiveMode.Read))
+            {
+                foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                {
+                    if (zipEntry.FullName.Last() == '/') { continue; }
+                    if (File.Exists(obsPath.Path + zipEntry.FullName))
+                    {
+                        someFound = true;
+                        if (allMatching && zipEntry.Length != new FileInfo(obsPath.Path + zipEntry.FullName).Length)
+                        {
+                            allMatching = false;
+                        }
+                    }
+                    else
+                    {
+                        allMatching = false;
+                    }
+                }
+            }
+            if (allMatching)
+            {
+                return PluginInstallationStateType.INSTALLED;
+            }
+            else if (someFound)
+            {
+                return PluginInstallationStateType.FILES_PRESENT;
+            }
+            else
+            {
+                return PluginInstallationStateType.NOT_INSTALLED;
+            }
+        }
+
         public bool addPlugins(string name_)
         {
             try
             {
                 if (obsPath.Path == string.Empty && pluginsPath == string.Empty) return false;
-                // Check if already exists
+                foreach (Plugin p in listPlugins)
+                {
+                    if (p.Name == name_)
+                    {
+                        if (p.Installed == PluginInstallationType.FILES_PRESENT)
+                        {
+                            DialogResult dr = MessageBox.Show("Files from this plugin are present in the OBS directory, but they were not installed with the Plugin Manager.\nProbably a different version was installed manually in the OBS directory. Continuing might leave files from the previous manual installation in the OBS directory.\nDo you want to continue?", "Other version detected in OBS", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                            if (dr != DialogResult.Yes)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
                 string name = $"{name_}.zip";
                 using (ZipArchive zip = ZipFile.Open(pluginsPath + name, ZipArchiveMode.Read))
                 {
@@ -125,28 +213,29 @@ namespace PluginManagerObs.Classes
                             {
                                 Directory.CreateDirectory(obsPath.Path + justPath);
                             }
-                            zipEntry.ExtractToFile(obsPath.Path + zipWin);
+                            zipEntry.ExtractToFile(obsPath.Path + zipWin, true);
                         }
                     }
                 }
                 Plugin plugin = new();
-                for (int i=0; i<listPlugins.Count; i++)
+                for (int i = 0; i < listPlugins.Count; i++)
                 {
                     if (listPlugins[i].Name == name_)
                     {
                         plugin = listPlugins[i];
-                        plugin.IsInstalled = true;
-                        plugin.IsInstalled = true;
-                        plugin.InstalledDate = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
-                        plugin.OBSPathId = obsPath.OBSPathId;
+                        plugin.Installed = PluginInstallationType.INSTALLED;
+                        plugin.dbEntry.IsInstalled = true;
+                        plugin.dbEntry.InstalledDate = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
+                        plugin.dbEntry.OBSPathId = obsPath.OBSPathId;
                         break;
                     }
                 }
-                dbHandler.Add(plugin);
+                dbHandler.Add(plugin.dbEntry);
                 dbHandler.SaveChanges();
-            }catch (Exception e)
+            }
+            catch (Exception e)
             {
-                Debug.Write("IO Exception, while adding plugin "+ name_ + e.ToString());
+                Debug.Write("IO Exception, while adding plugin " + name_ + e.ToString());
                 return false;
             }
             return true;
@@ -155,67 +244,83 @@ namespace PluginManagerObs.Classes
         public bool uninstallPlugin(string name_)
         {
             string name = $"{name_}.zip";
-            string pluginFolder = string.Empty;
-            string dpPath = "data/obs-plugins/";
+
+            foreach (Plugin p in listPlugins)
+            {
+                if (p.Name == name_)
+                {
+                    if (p.Installed == PluginInstallationType.NOT_INSTALLED)
+                    {
+                        // nothing to do
+                        return true;
+                    }
+                    if (p.Installed == PluginInstallationType.FILES_PRESENT)
+                    {
+                        DialogResult dr = MessageBox.Show("Files from this plugin are present in the OBS directory, but they were not installed with the Plugin Manager.\nProbably a different version was installed manually in the OBS directory. Continuing might leave files from the previous manual installation in the OBS directory.\nDo you want to continue?", "Other version detected in OBS", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                        if (dr != DialogResult.Yes)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
 
             using (ZipArchive zip = ZipFile.Open(pluginsPath + name, ZipArchiveMode.Read))
             {
+                // Remove files
                 foreach (ZipArchiveEntry zipEntry in zip.Entries)
                 {
-                    int len = zipEntry.FullName.Length-1;
-                    string fullName = zipEntry.FullName;
-                    int end=0;
-
                     if (zipEntry.FullName.Last() != '/')
                     {
-                        if (pluginFolder == string.Empty && fullName.Contains(dpPath) && len > 16)
-                        {
-                            for(int i = 18; i < len; i++)
-                            {
-                                if (fullName[i] == '/')
-                                {
-                                    end = i;
-                                    break;
-                                }
-                            }
-                            string ss = fullName.Substring(17, end - 17);
-                            Debug.WriteLine($"Substring plugin name: {ss}");
-                            pluginFolder = ss;
-                        }
                         string zipWin = zipEntry.FullName.Replace('/', '\\');
                         if (File.Exists(obsPath.Path + zipWin))
+                        {
                             try
                             {
                                 File.Delete(obsPath.Path + zipWin);
-                            }catch (Exception e) when (e is IOException ||
+                            }
+                            catch (Exception e) when (e is IOException ||
                                                        e is UnauthorizedAccessException)
                             {
                                 Debug.WriteLine($"Error deleting file {zipWin}: {e}");
                                 return false;
                             }
+                        }
                     }
                 }
-                if (Directory.Exists(obsPath.Path + dpPath + pluginFolder))
-                    try
+                // Remove empty directories in second iteration
+                foreach (ZipArchiveEntry zipEntry in zip.Entries.Reverse())
+                {
+                    if (zipEntry.FullName.Last() == '/')
                     {
-                        Directory.Delete(obsPath.Path + dpPath + pluginFolder, true);
+                        string dirpath = obsPath.Path + zipEntry.FullName;
+                        if (Directory.Exists(dirpath) && Directory.GetFileSystemEntries(dirpath).Length == 0)
+                        {
+                            try
+                            {
+                                Directory.Delete(dirpath, true);
+                            }
+                            catch (IOException e)
+                            {
+                                Debug.WriteLine($"Error deleting directory {dirpath}: {e}");
+                                return false;
+                            }
+                        }
                     }
-                    catch (IOException e)
-                    {
-                        Debug.WriteLine($"Error deleting directory {pluginFolder}: {e}");
-                        return false;
-                    }
+                }
             }
             foreach (Plugin p in listPlugins)
             {
                 if (p.Name == name_)
                 {
-                    p.IsInstalled = false;
-                    p.InstalledDate = 0;
-                    var query = dbHandler.Plugins.Where(plugin => plugin.Name == name_ && plugin.OBSPathId == obsPath.OBSPathId);
+                    p.Installed = PluginInstallationType.NOT_INSTALLED;
+                    p.dbEntry.IsInstalled = false;
+                    p.dbEntry.InstalledDate = 0;
+                    var query = dbHandler.Plugins.Where(dbPlugin => dbPlugin.Name == name_ && dbPlugin.OBSPathId == obsPath.OBSPathId);
                     if (query.Count() > 0)
                     {
-                        dbHandler.Plugins.Remove(p);
+                        dbHandler.Plugins.Remove(p.dbEntry);
                         dbHandler.SaveChanges();
                     }
                     break;
@@ -239,7 +344,8 @@ namespace PluginManagerObs.Classes
                         File.Copy(file, pluginsPath + nameAndExtension);
                     else
                         return false;
-                }catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     Debug.WriteLine($"Could not copy file {nameAndExtension} : " + e.ToString());
                     return false;
@@ -255,20 +361,20 @@ namespace PluginManagerObs.Classes
         // TODO, remove? Private, later
         public void vanityRemoval()
         {
-            vanityCheck(obsPath.Path,0);
+            vanityCheck(obsPath.Path, 0);
         }
 
-        private void vanityCheck(string path,int tabs)
+        private void vanityCheck(string path, int tabs)
         {
             string space = "";
-            for(int i = 0; i < tabs; i++) { space += "   "; }
+            for (int i = 0; i < tabs; i++) { space += "   "; }
             // If no file && no dir, DELETE
             // else
             var files = Directory.EnumerateFiles(path);
             var directories = Directory.EnumerateDirectories(path);
             if (files.Count() == 0 && directories.Count() == 0)
             {
-                Directory.Delete(path,false);
+                Directory.Delete(path, false);
                 Debug.WriteLine($"Vanity {path} DELETED!");
             }
             else
@@ -279,7 +385,7 @@ namespace PluginManagerObs.Classes
                     vanityCheck(dir, tabs + 1);
                 }
                 var entries = Directory.EnumerateFileSystemEntries(path);
-                if(entries.Count() == 0)
+                if (entries.Count() == 0)
                 {
                     Directory.Delete(path, false);
                     Debug.WriteLine($"Vanity {path} DELETED!");
@@ -331,7 +437,7 @@ namespace PluginManagerObs.Classes
 
                 pluginsPath = (string)model["pluginspath"];
                 pluginsPath = pluginsPath.Replace('/', '\\');
-                if(!System.IO.Directory.Exists(pluginsPath))
+                if (!System.IO.Directory.Exists(pluginsPath))
                 {
                     pluginsPath = string.Empty;
                 }
@@ -356,7 +462,7 @@ namespace PluginManagerObs.Classes
         public bool validateObsPath(string obsPath)
         {
             bool exists = false;
-            if(File.Exists(obsPath + @"bin\64bit\obs64.exe") || File.Exists(obsPath + @"bin\32bit\obs.exe")) exists = true;
+            if (File.Exists(obsPath + @"bin\64bit\obs64.exe") || File.Exists(obsPath + @"bin\32bit\obs.exe")) exists = true;
             return exists;
         }
 

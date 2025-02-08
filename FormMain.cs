@@ -69,7 +69,7 @@ namespace PluginManagerObs
         {
             textBoxSearch.Text = string.Empty;
             listViewPlugins.Items.Clear();
-            bool refreshed = controllerPlugins.populatePlugins();
+            bool refreshed = controllerPlugins.populatePluginLists();
             if (refreshed)
             {
                 PopulateListViewPlugins();
@@ -89,31 +89,26 @@ namespace PluginManagerObs
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            // Enable multi-Pick
             if (controllerPlugins.getObsPath() == string.Empty)
             {
                 MessageBox.Show("OBS path not set", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (listViewPlugins.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Pick one plugin", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            ListViewItem lvi = listViewPlugins.SelectedItems[0];
+            Debug.WriteLine($"Plugin to add: {lvi.Text}");
+            if (controllerPlugins.addPlugins(lvi.Text))
+            {
+                listViewPlugins.Items.Clear();
+                PopulateListViewPlugins();
             }
             else
             {
-                if (listViewPlugins.SelectedItems.Count == 0)
-                {
-                    MessageBox.Show("Pick one plugin", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    ListViewItem lvi = listViewPlugins.SelectedItems[0];
-                    Debug.WriteLine($"Plugin to add: {lvi.Text}");
-                    if (controllerPlugins.addPlugins(lvi.Text))
-                    {
-                        listViewPlugins.Items.Clear();
-                        PopulateListViewPlugins();
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Could not add {lvi.Text}\nOther version might be already installed", "Could not add", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
+                MessageBox.Show($"Could not add {lvi.Text}\nOther version might be already installed", "Could not add", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -123,20 +118,41 @@ namespace PluginManagerObs
             {
                 ListViewItem lvi = new ListViewItem(p.Name);
                 lvi.UseItemStyleForSubItems = false;
-
-                string status = "Not Installed";
-                Color bgColor = Color.FromArgb(unchecked((int)0xFF2b5797));
-                if (p.IsInstalled)
+                string status;
+                Color bgColor;
+                switch (p.Installed)
                 {
-                    status = "Installed";
-                    bgColor = Color.FromArgb(unchecked((int)0xFF1e7145));
+                    case PluginInstallationType.NOT_INSTALLED:
+                        status = "Not Installed";
+                        bgColor = Color.FromKnownColor(KnownColor.LightBlue);
+                        break;
+                    case PluginInstallationType.INSTALLED:
+                        status = "Installed";
+                        bgColor = Color.FromKnownColor(KnownColor.Green);
+                        break;
+                    case PluginInstallationType.MANUALLY_INSTALLED:
+                        status = "Manually Installed";
+                        bgColor = Color.FromKnownColor(KnownColor.GreenYellow);
+                        break;
+                    case PluginInstallationType.FILES_PRESENT:
+                        status = "Partial files found";
+                        bgColor = Color.FromKnownColor(KnownColor.Yellow);
+                        break;
+                    case PluginInstallationType.INSTALLED_MODIFIED:
+                        status = "Installed - modified";
+                        bgColor = Color.FromKnownColor(KnownColor.Crimson);
+                        break;
+                    default:
+                        status = "Unknown";
+                        bgColor = Color.FromKnownColor(KnownColor.Control);
+                        break;
                 }
 
                 lvi.SubItems.Add(status);
                 lvi.SubItems[1].BackColor = bgColor;
-                if (p.InstalledDate > 0)
+                if (p.dbEntry.InstalledDate > 0)
                 {
-                    lvi.SubItems.Add(DateTimeOffset.FromUnixTimeMilliseconds(p.InstalledDate).LocalDateTime.ToString());
+                    lvi.SubItems.Add(DateTimeOffset.FromUnixTimeMilliseconds(p.dbEntry.InstalledDate).LocalDateTime.ToString());
                 }
                 listViewPlugins.Items.Add(lvi);
             }
@@ -148,27 +164,23 @@ namespace PluginManagerObs
             if (controllerPlugins.getObsPath() == string.Empty)
             {
                 MessageBox.Show("OBS path not set", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (listViewPlugins.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Pick one plugin", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            ListViewItem lvi = listViewPlugins.SelectedItems[0];
+            Debug.WriteLine(lvi.Text);
+            if (controllerPlugins.uninstallPlugin(lvi.Text))
+            {
+                listViewPlugins.Items.Clear();
+                PopulateListViewPlugins();
             }
             else
             {
-                if (listViewPlugins.SelectedItems.Count == 0)
-                {
-                    MessageBox.Show("Pick one plugin", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    ListViewItem lvi = listViewPlugins.SelectedItems[0];
-                    Debug.WriteLine(lvi.Text);
-                    if (controllerPlugins.uninstallPlugin(lvi.Text))
-                    {
-                        listViewPlugins.Items.Clear();
-                        PopulateListViewPlugins();
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Could not remove {lvi.Text}\nIs OBS running?", "Could not remove", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
+                MessageBox.Show($"Could not remove {lvi.Text}\nIs OBS running?", "Could not remove", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

@@ -108,12 +108,12 @@
             // columnHeaderStatus
             // 
             columnHeaderStatus.Text = "Status";
-            columnHeaderStatus.Width = 80;
+            columnHeaderStatus.Width = 140;
             // 
             // columnHeaderDate
             // 
             columnHeaderDate.Text = "Date";
-            columnHeaderDate.Width = 180;
+            columnHeaderDate.Width = 140;
             // 
             // textBoxSearch
             // 
@@ -204,7 +204,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlLight;
             ClientSize = new Size(714, 390);
-            Controls.Add(panelDragnDrop);
             Controls.Add(labelSign);
             Controls.Add(buttonRemove);
             Controls.Add(buttonAdd);
@@ -212,6 +211,7 @@
             Controls.Add(buttonSearch);
             Controls.Add(textBoxSearch);
             Controls.Add(listViewPlugins);
+            Controls.Add(panelDragnDrop);
             Controls.Add(labelPluginsPath);
             Controls.Add(labelObsPath);
             Controls.Add(buttonPluginsPath);
