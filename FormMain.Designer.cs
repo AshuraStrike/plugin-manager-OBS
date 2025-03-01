@@ -1,4 +1,4 @@
-﻿namespace PluginManagerObs
+namespace PluginManagerObs
 {
     partial class FormMain
     {
@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             buttonObsPath = new Button();
             buttonPluginsPath = new Button();
@@ -46,6 +47,8 @@
             labelSign = new Label();
             panelDragnDrop = new Panel();
             labelDrop = new Label();
+            labelWarnings = new Label();
+            buttonMarkNotInstalled = new Button();
             panelDragnDrop.SuspendLayout();
             SuspendLayout();
             // 
@@ -55,7 +58,7 @@
             buttonObsPath.Name = "buttonObsPath";
             buttonObsPath.Size = new Size(95, 23);
             buttonObsPath.TabIndex = 0;
-            buttonObsPath.Text = "Obs Path";
+            buttonObsPath.Text = "OBS Path";
             buttonObsPath.UseVisualStyleBackColor = true;
             buttonObsPath.Click += buttonObsPath_Click;
             // 
@@ -99,6 +102,7 @@
             listViewPlugins.TabIndex = 4;
             listViewPlugins.UseCompatibleStateImageBehavior = false;
             listViewPlugins.View = View.Details;
+            listViewPlugins.SelectedIndexChanged += listViewPlugins_SelectedIndexChanged;
             // 
             // columnHeaderName
             // 
@@ -121,6 +125,7 @@
             textBoxSearch.Name = "textBoxSearch";
             textBoxSearch.Size = new Size(447, 23);
             textBoxSearch.TabIndex = 5;
+            textBoxSearch.TextChanged += textBoxSearch_TextChanged;
             // 
             // buttonSearch
             // 
@@ -144,21 +149,23 @@
             // 
             // buttonAdd
             // 
+            buttonAdd.Enabled = false;
             buttonAdd.Location = new Point(627, 41);
             buttonAdd.Name = "buttonAdd";
-            buttonAdd.Size = new Size(75, 23);
+            buttonAdd.Size = new Size(186, 23);
             buttonAdd.TabIndex = 8;
-            buttonAdd.Text = "Add";
+            buttonAdd.Text = "Add Plugin";
             buttonAdd.UseVisualStyleBackColor = true;
             buttonAdd.Click += buttonAdd_Click;
             // 
             // buttonRemove
             // 
+            buttonRemove.Enabled = false;
             buttonRemove.Location = new Point(627, 70);
             buttonRemove.Name = "buttonRemove";
-            buttonRemove.Size = new Size(75, 23);
+            buttonRemove.Size = new Size(186, 23);
             buttonRemove.TabIndex = 9;
-            buttonRemove.Text = "Remove";
+            buttonRemove.Text = "Remove Plugin";
             buttonRemove.UseVisualStyleBackColor = true;
             buttonRemove.Click += buttonRemove_Click;
             // 
@@ -166,7 +173,7 @@
             // 
             labelSign.AutoSize = true;
             labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic, GraphicsUnit.Point);
-            labelSign.Location = new Point(576, 362);
+            labelSign.Location = new Point(668, 365);
             labelSign.Name = "labelSign";
             labelSign.Size = new Size(126, 16);
             labelSign.TabIndex = 10;
@@ -197,21 +204,45 @@
             labelDrop.Text = "Drop files here!";
             labelDrop.Visible = false;
             // 
+            // labelWarnings
+            // 
+            labelWarnings.AutoSize = true;
+            labelWarnings.Location = new Point(627, 125);
+            labelWarnings.MaximumSize = new Size(187, 0);
+            labelWarnings.Name = "labelWarnings";
+            labelWarnings.Size = new Size(174, 120);
+            labelWarnings.TabIndex = 12;
+            labelWarnings.Text = "Not all files from the Zip are present in the OBS directory, or they do not match the existing files.\r\nLikely a different version of this plugin was installed after installation by the Plugin Manager";
+            labelWarnings.Visible = false;
+            // 
+            // buttonMarkNotInstalled
+            // 
+            buttonMarkNotInstalled.Enabled = false;
+            buttonMarkNotInstalled.Location = new Point(627, 99);
+            buttonMarkNotInstalled.Name = "buttonMarkNotInstalled";
+            buttonMarkNotInstalled.Size = new Size(186, 23);
+            buttonMarkNotInstalled.TabIndex = 9;
+            buttonMarkNotInstalled.Text = "Clear Manager Installation Flag";
+            buttonMarkNotInstalled.UseVisualStyleBackColor = true;
+            buttonMarkNotInstalled.Click += buttonMarkNotInstalled_Click;
+            // 
             // FormMain
             // 
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlLight;
-            ClientSize = new Size(714, 390);
+            ClientSize = new Size(825, 388);
+            Controls.Add(labelWarnings);
             Controls.Add(labelSign);
+            Controls.Add(buttonMarkNotInstalled);
             Controls.Add(buttonRemove);
             Controls.Add(buttonAdd);
             Controls.Add(buttonReload);
             Controls.Add(buttonSearch);
             Controls.Add(textBoxSearch);
-            Controls.Add(listViewPlugins);
             Controls.Add(panelDragnDrop);
+            Controls.Add(listViewPlugins);
             Controls.Add(labelPluginsPath);
             Controls.Add(labelObsPath);
             Controls.Add(buttonPluginsPath);
@@ -250,5 +281,7 @@
         private ColumnHeader columnHeaderDate;
         private Panel panelDragnDrop;
         private Label labelDrop;
+        private Label labelWarnings;
+        private Button buttonMarkNotInstalled;
     }
 }

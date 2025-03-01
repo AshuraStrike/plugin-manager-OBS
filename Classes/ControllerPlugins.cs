@@ -98,7 +98,7 @@ namespace PluginManagerObs.Classes
                         Name = listPluginsFull[i].Name
                     };
                 }
-                var temp = getPluginState(listPluginsFull[i].Name);
+                var temp = determinePluginState(listPluginsFull[i].Name);
                 if (listPluginsFull[i].Installed == PluginInstallationType.INSTALLED)
                 {
                     switch (temp)
@@ -130,7 +130,7 @@ namespace PluginManagerObs.Classes
             return true;
         }
 
-        public PluginInstallationStateType getPluginState(string simpleName)
+        private PluginInstallationStateType determinePluginState(string simpleName)
         {
             bool someFound = false;
             bool allMatching = true;
@@ -165,6 +165,18 @@ namespace PluginManagerObs.Classes
             {
                 return PluginInstallationStateType.NOT_INSTALLED;
             }
+        }
+
+        public PluginInstallationType getInstallStateOfPlugin(string name_)
+        {
+            foreach (Plugin p in listPlugins)
+            {
+                if (p.Name == name_)
+                {
+                    return p.Installed;
+                }
+            }
+            return PluginInstallationType.NOT_INSTALLED;
         }
 
         public bool addPlugins(string name_)
@@ -254,14 +266,6 @@ namespace PluginManagerObs.Classes
                         // nothing to do
                         return true;
                     }
-                    if (p.Installed == PluginInstallationType.FILES_PRESENT)
-                    {
-                        DialogResult dr = MessageBox.Show("Files from this plugin are present in the OBS directory, but they were not installed with the Plugin Manager.\nProbably a different version was installed manually in the OBS directory. Continuing might leave files from the previous manual installation in the OBS directory.\nDo you want to continue?", "Other version detected in OBS", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-                        if (dr != DialogResult.Yes)
-                        {
-                            return true;
-                        }
-                    }
                 }
             }
 
@@ -310,6 +314,13 @@ namespace PluginManagerObs.Classes
                     }
                 }
             }
+            markPluginUninstalled(name_);
+
+            return true;
+        }
+
+        public void markPluginUninstalled(string name_)
+        {
             foreach (Plugin p in listPlugins)
             {
                 if (p.Name == name_)
@@ -326,8 +337,6 @@ namespace PluginManagerObs.Classes
                     break;
                 }
             }
-
-            return true;
         }
 
         public bool copyPluginZip(string file)

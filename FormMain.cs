@@ -62,6 +62,7 @@ namespace PluginManagerObs
                 labelObsPath.Text = controllerPlugins.getObsPath();
                 labelPluginsPath.Text = controllerPlugins.pluginsPath;
                 buttonReload.PerformClick();
+                UpdatePluginActionButtonState();
             }
         }
 
@@ -91,12 +92,10 @@ namespace PluginManagerObs
         {
             if (controllerPlugins.getObsPath() == string.Empty)
             {
-                MessageBox.Show("OBS path not set", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (listViewPlugins.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Pick one plugin", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             ListViewItem lvi = listViewPlugins.SelectedItems[0];
@@ -135,11 +134,11 @@ namespace PluginManagerObs
                         bgColor = Color.FromKnownColor(KnownColor.GreenYellow);
                         break;
                     case PluginInstallationType.FILES_PRESENT:
-                        status = "Partial files found";
+                        status = "Files present";
                         bgColor = Color.FromKnownColor(KnownColor.Yellow);
                         break;
                     case PluginInstallationType.INSTALLED_MODIFIED:
-                        status = "Installed - modified";
+                        status = "Installed - Modified";
                         bgColor = Color.FromKnownColor(KnownColor.Crimson);
                         break;
                     default:
@@ -158,17 +157,67 @@ namespace PluginManagerObs
             }
         }
 
+        private void UpdatePluginActionButtonState()
+        {
+            if (controllerPlugins.getObsPath() == string.Empty || listViewPlugins.SelectedIndices.Count == 0)
+            {
+                buttonAdd.Enabled = false;
+                buttonRemove.Enabled = false;
+                buttonMarkNotInstalled.Enabled = false;
+                return;
+            }
+            labelWarnings.Visible = false;
+            ListViewItem lvi = listViewPlugins.SelectedItems[0];
+            switch (controllerPlugins.getInstallStateOfPlugin(lvi.Text))
+            {
+                case PluginInstallationType.NOT_INSTALLED:
+                    buttonAdd.Enabled = true;
+                    buttonRemove.Enabled = false;
+                    buttonMarkNotInstalled.Enabled = false;
+                    break;
+                case PluginInstallationType.INSTALLED:
+                    buttonAdd.Enabled = false;
+                    buttonRemove.Enabled = true;
+                    buttonMarkNotInstalled.Enabled = false;
+                    break;
+                case PluginInstallationType.MANUALLY_INSTALLED:
+                    buttonAdd.Enabled = true;
+                    buttonRemove.Enabled = true;
+                    buttonMarkNotInstalled.Enabled = false;
+                    labelWarnings.Text = "All files from the Zip are already present in the OBS directory, but they were not installed by the Plugin Manager";
+                    labelWarnings.Visible = true;
+                    break;
+                case PluginInstallationType.FILES_PRESENT:
+                    buttonAdd.Enabled = true;
+                    buttonRemove.Enabled = true;
+                    buttonMarkNotInstalled.Enabled = false;
+                    labelWarnings.Text = "Not all files from the Zip are present in the OBS directory, or they do not match the existing files.\r\nLikely a different version of this plugin is installed";
+                    labelWarnings.Visible = true;
+                    break;
+                case PluginInstallationType.INSTALLED_MODIFIED:
+                    buttonAdd.Enabled = true;
+                    buttonRemove.Enabled = true;
+                    buttonMarkNotInstalled.Enabled = true;
+                    labelWarnings.Text = "Not all files from the Zip are present in the OBS directory, or they do not match the existing files.\r\nLikely a different version of this plugin was installed after installation by the Plugin Manager";
+                    labelWarnings.Visible = true;
+                    break;
+                default:
+                    buttonAdd.Enabled = false;
+                    buttonRemove.Enabled = false;
+                    buttonMarkNotInstalled.Enabled = false;
+                    break;
+            }
+        }
+
         private void buttonRemove_Click(object sender, EventArgs e)
         {
             // Enable multi-Pick
             if (controllerPlugins.getObsPath() == string.Empty)
             {
-                MessageBox.Show("OBS path not set", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (listViewPlugins.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Pick one plugin", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             ListViewItem lvi = listViewPlugins.SelectedItems[0];
@@ -182,6 +231,24 @@ namespace PluginManagerObs
             {
                 MessageBox.Show($"Could not remove {lvi.Text}\nIs OBS running?", "Could not remove", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void buttonMarkNotInstalled_Click(object sender, EventArgs e)
+        {
+            // Enable multi-Pick
+            if (controllerPlugins.getObsPath() == string.Empty)
+            {
+                return;
+            }
+            if (listViewPlugins.SelectedItems.Count == 0)
+            {
+                return;
+            }
+            ListViewItem lvi = listViewPlugins.SelectedItems[0];
+            Debug.WriteLine(lvi.Text);
+            controllerPlugins.markPluginUninstalled(lvi.Text);
+            listViewPlugins.Items.Clear();
+            PopulateListViewPlugins();
         }
 
         private void panelDragnDrop_DragDrop(object sender, DragEventArgs e)
@@ -243,6 +310,16 @@ namespace PluginManagerObs
         {
             panelDragnDrop.Visible = false;
             labelDrop.Visible = false;
+        }
+
+        private void textBoxSearch_TextChanged(object sender, EventArgs e)
+        {
+            buttonSearch.PerformClick();
+        }
+
+        private void listViewPlugins_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdatePluginActionButtonState();
         }
     }
 }
