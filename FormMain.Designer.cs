@@ -1,4 +1,4 @@
-namespace PluginManagerObs
+﻿namespace PluginManagerObs
 {
     partial class FormMain
     {
@@ -269,6 +269,7 @@ namespace PluginManagerObs
             Controls.Add(buttonObsPath);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
+            KeyPreview = true;
             MaximizeBox = false;
             Name = "FormMain";
             Text = "Plugin Manager for OBS";
@@ -276,6 +277,8 @@ namespace PluginManagerObs
             DragDrop += FormMain_DragDrop;
             DragOver += FormMain_DragOver;
             DragLeave += FormMain_DragLeave;
+            KeyDown += FormMain_KeyDown;
+            KeyUp += FormMain_KeyUp;
             panelDragnDrop.ResumeLayout(false);
             panelDragnDrop.PerformLayout();
             ResumeLayout(false);

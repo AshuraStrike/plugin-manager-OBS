@@ -109,6 +109,7 @@ namespace PluginManagerObs
             {
                 return;
             }
+            if (AbortActionOverride()) { return; }
             ListViewItem lvi = listViewPlugins.SelectedItems[0];
             Debug.WriteLine($"Plugin to add: {lvi.Text}");
             if (controllerPlugins.addPlugins(lvi.Text))
@@ -119,6 +120,40 @@ namespace PluginManagerObs
             else
             {
                 MessageBox.Show($"Could not add {lvi.Text}\nOther version might be already installed", "Could not add", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private bool AbortActionOverride()
+        {
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                return false;
+            }
+            else
+            {
+                ListViewItem lvi = listViewPlugins.SelectedItems[0];
+                foreach (Plugin p in controllerPlugins.listPlugins)
+                {
+                    if (p.Name != lvi.Text)
+                    {
+                        continue;
+                    }
+                    switch (p.Installed)
+                    {
+                        case PluginInstallationType.FILES_PRESENT:
+                        case PluginInstallationType.INSTALLED_MODIFIED:
+                            DialogResult dr = MessageBox.Show("This action will overwrite actions done to the selected plugin outside of the Plugin Manager, unless multiple versions are managed.\r\nDo you want to continue?", "Overwrite outside action?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                            if (dr != DialogResult.Yes)
+                            {
+                                return true;
+                            }
+                            return false;
+                        default:
+                            return false;
+                    }
+                }
+                // shouldn't be reached
+                return true;
             }
         }
 
@@ -276,6 +311,7 @@ namespace PluginManagerObs
             {
                 return;
             }
+            if (AbortActionOverride()) { return; }
             ListViewItem lvi = listViewPlugins.SelectedItems[0];
             Debug.WriteLine(lvi.Text);
             if (controllerPlugins.uninstallPlugin(lvi.Text))
@@ -381,6 +417,24 @@ namespace PluginManagerObs
         private void timerOBSCheck_Tick(object sender, EventArgs e)
         {
             CheckOBSRunningState();
+        }
+
+        private void FormMain_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.ControlKey)
+            {
+                buttonAdd.Text = "Force Add Plugin";
+                buttonRemove.Text = "Force Remove Plugin";
+            }
+        }
+
+        private void FormMain_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.ControlKey)
+            {
+                buttonAdd.Text = "Add Plugin";
+                buttonRemove.Text = "Remove Plugin";
+            }
         }
     }
 }
