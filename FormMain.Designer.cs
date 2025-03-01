@@ -47,8 +47,10 @@ namespace PluginManagerObs
             labelSign = new Label();
             panelDragnDrop = new Panel();
             labelDrop = new Label();
+            timerOBSCheck = new System.Windows.Forms.Timer(components);
             labelWarnings = new Label();
             buttonMarkNotInstalled = new Button();
+            labelOBSWarning = new Label();
             panelDragnDrop.SuspendLayout();
             SuspendLayout();
             // 
@@ -204,6 +206,12 @@ namespace PluginManagerObs
             labelDrop.Text = "Drop files here!";
             labelDrop.Visible = false;
             // 
+            // timerOBSCheck
+            // 
+            timerOBSCheck.Enabled = true;
+            timerOBSCheck.Interval = 2000;
+            timerOBSCheck.Tick += timerOBSCheck_Tick;
+            // 
             // labelWarnings
             // 
             labelWarnings.AutoSize = true;
@@ -226,6 +234,17 @@ namespace PluginManagerObs
             buttonMarkNotInstalled.UseVisualStyleBackColor = true;
             buttonMarkNotInstalled.Click += buttonMarkNotInstalled_Click;
             // 
+            // labelOBSWarning
+            // 
+            labelOBSWarning.AutoSize = true;
+            labelOBSWarning.Location = new Point(627, 250);
+            labelOBSWarning.MaximumSize = new Size(187, 0);
+            labelOBSWarning.Name = "labelOBSWarning";
+            labelOBSWarning.Size = new Size(174, 75);
+            labelOBSWarning.TabIndex = 13;
+            labelOBSWarning.Text = "Warning:\r\nAn elevated OBS installation is currently running. Unable to check whether it is the selected OBS path.";
+            labelOBSWarning.Visible = false;
+            // 
             // FormMain
             // 
             AllowDrop = true;
@@ -233,6 +252,7 @@ namespace PluginManagerObs
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlLight;
             ClientSize = new Size(825, 388);
+            Controls.Add(labelOBSWarning);
             Controls.Add(labelWarnings);
             Controls.Add(labelSign);
             Controls.Add(buttonMarkNotInstalled);
@@ -281,7 +301,9 @@ namespace PluginManagerObs
         private ColumnHeader columnHeaderDate;
         private Panel panelDragnDrop;
         private Label labelDrop;
+        private System.Windows.Forms.Timer timerOBSCheck;
         private Label labelWarnings;
         private Button buttonMarkNotInstalled;
+        private Label labelOBSWarning;
     }
 }

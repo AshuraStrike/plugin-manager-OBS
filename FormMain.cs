@@ -1,6 +1,8 @@
 using PluginManagerObs.Classes;
 using PluginManagerObs.Models;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -9,6 +11,15 @@ namespace PluginManagerObs
     public partial class FormMain : Form
     {
         ControllerPlugins controllerPlugins = new();
+
+        enum OBSRunningStateType
+        {
+            NotRunning,
+            ExactRunning,
+            AdminRunning
+        }
+        OBSRunningStateType OBSRunningState = OBSRunningStateType.NotRunning;
+
         public FormMain()
         {
             InitializeComponent();
@@ -209,6 +220,51 @@ namespace PluginManagerObs
             }
         }
 
+        private void CheckOBSRunningState()
+        {
+            var prevOBSState = OBSRunningState;
+            OBSRunningStateType tempRunning = OBSRunningStateType.NotRunning;
+            if (controllerPlugins.getObsPath() != string.Empty)
+            {
+                List<Process> procs = new List<Process>();
+                procs.AddRange(Process.GetProcessesByName("obs64"));
+                procs.AddRange(Process.GetProcessesByName("obs")); // 32-bit executable name
+                foreach (Process p in procs)
+                {
+                    try
+                    {
+                        if (p.MainModule.FileName.StartsWith(controllerPlugins.getObsPath(), StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            tempRunning = OBSRunningStateType.ExactRunning;
+                            break;
+                        }
+                    }
+                    catch (Win32Exception)
+                    {
+                        tempRunning = OBSRunningStateType.AdminRunning;
+                    }
+                }
+            }
+            OBSRunningState = tempRunning;
+            if (prevOBSState != OBSRunningState)
+            {
+                switch (OBSRunningState)
+                {
+                    case OBSRunningStateType.ExactRunning:
+                        labelOBSWarning.Visible = true;
+                        labelOBSWarning.Text = "Warning:\r\nThis OBS installation is currently running!";
+                        break;
+                    case OBSRunningStateType.AdminRunning:
+                        labelOBSWarning.Visible = true;
+                        labelOBSWarning.Text = "Warning:\r\nAn elevated OBS installation is currently running. Unable to check whether it is the selected OBS path.";
+                        break;
+                    default:
+                        labelOBSWarning.Visible = false;
+                        break;
+                }
+            }
+        }
+
         private void buttonRemove_Click(object sender, EventArgs e)
         {
             // Enable multi-Pick
@@ -320,6 +376,11 @@ namespace PluginManagerObs
         private void listViewPlugins_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdatePluginActionButtonState();
+        }
+
+        private void timerOBSCheck_Tick(object sender, EventArgs e)
+        {
+            CheckOBSRunningState();
         }
     }
 }
