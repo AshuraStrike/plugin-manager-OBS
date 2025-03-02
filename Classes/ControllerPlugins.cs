@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 using Microsoft.Data.Sqlite;
@@ -404,12 +405,20 @@ namespace PluginManagerObs.Classes
 
         public bool validateZip(string file)
         {
-            using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
+            try
             {
-                foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                using (ZipArchive zip = ZipFile.Open(file, ZipArchiveMode.Read))
                 {
-                    if (zipEntry.ToString().Contains("obs-plugins/")) return true;
+                    foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                    {
+                        if (zipEntry.ToString().Contains("obs-plugins/")) return true;
+                    }
                 }
+            }
+            catch
+            {
+                // Zip likely corrupted
+                return false;
             }
             return false;
         }
