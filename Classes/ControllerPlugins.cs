@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -202,8 +203,33 @@ namespace PluginManagerObs.Classes
                 string name = $"{name_}.zip";
                 using (ZipArchive zip = ZipFile.Open(pluginsPath + name, ZipArchiveMode.Read))
                 {
-                    foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                    int[] orderedFiles = new int[zip.Entries.Count + 2];
+
+                    orderedFiles[0] = -1;
+                    orderedFiles[1] = -1;
+                    for (int i = 0; i < zip.Entries.Count; ++i)
                     {
+                        orderedFiles[i + 2] = -1;
+                        if (orderedFiles[0] == -1 && Regex.IsMatch(zip.Entries[i].FullName, @"^obs-plugins\/64bit\/.*\.dll"))
+                        {
+                            orderedFiles[0] = i;
+                        }
+                        else if (orderedFiles[1] == -1 && Regex.IsMatch(zip.Entries[i].FullName, @"^obs-plugins\/32bit\/.*\.dll"))
+                        {
+                            orderedFiles[1] = i;
+                        }
+                        else
+                        {
+                            orderedFiles[i + 2] = i;
+                        }
+                    }
+                    for (int i = 0; i < orderedFiles.Count(); ++i)
+                    {
+                        if (orderedFiles[i]<0)
+                        {
+                            continue;
+                        }
+                        ZipArchiveEntry zipEntry = zip.Entries[orderedFiles[i]];
                         string zipWin = zipEntry.FullName.Replace('/', '\\');
 
                         if (zipEntry.FullName.Last<char>() == '/')
@@ -218,9 +244,9 @@ namespace PluginManagerObs.Classes
                             // benchmark split vs substring
                             string[] path = zipWin.Split('\\');
                             string justPath = string.Empty;
-                            for (int i = 0; i < path.Length - 1; i++)
+                            for (int k = 0; k < path.Length - 1; k++)
                             {
-                                justPath += path[i] + '\\';
+                                justPath += path[k] + '\\';
                             }
                             if (!Directory.Exists(obsPath.Path + justPath))
                             {
@@ -273,7 +299,29 @@ namespace PluginManagerObs.Classes
 
             using (ZipArchive zip = ZipFile.Open(pluginsPath + name, ZipArchiveMode.Read))
             {
-                // Remove files
+                // Try to remove main libraries first
+                foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                {
+                    if (Regex.IsMatch(zipEntry.FullName, @"^obs-plugins\/(32|64)bit\/.*\.dll"))
+                    {
+                        string zipWin = zipEntry.FullName.Replace('/', '\\');
+                        if (File.Exists(obsPath.Path + zipWin))
+                        {
+                            try
+                            {
+                                File.Delete(obsPath.Path + zipWin);
+                            }
+                            catch (Exception e) when (e is IOException ||
+                                                       e is UnauthorizedAccessException)
+                            {
+                                Debug.WriteLine($"Error deleting file {zipWin}: {e}");
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                // Remove other files
                 foreach (ZipArchiveEntry zipEntry in zip.Entries)
                 {
                     if (zipEntry.FullName.Last() != '/')
@@ -411,7 +459,10 @@ namespace PluginManagerObs.Classes
                 {
                     foreach (ZipArchiveEntry zipEntry in zip.Entries)
                     {
-                        if (zipEntry.ToString().Contains("obs-plugins/")) return true;
+                        if (Regex.IsMatch(zipEntry.FullName, @"^obs-plugins\/(32|64)bit\/.*\.dll"))
+                        {
+                            return true;
+                        }
                     }
                 }
             }

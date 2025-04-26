@@ -112,15 +112,14 @@ namespace PluginManagerObs
             if (AbortActionOverride()) { return; }
             ListViewItem lvi = listViewPlugins.SelectedItems[0];
             Debug.WriteLine($"Plugin to add: {lvi.Text}");
-            if (controllerPlugins.addPlugins(lvi.Text))
+            if (!controllerPlugins.addPlugins(lvi.Text))
             {
-                listViewPlugins.Items.Clear();
-                PopulateListViewPlugins();
+                MessageBox.Show($"Failed to add {lvi.Text}", "Unable to add", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            else
-            {
-                MessageBox.Show($"Could not add {lvi.Text}\nOther version might be already installed", "Could not add", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            listViewPlugins.Items.Clear();
+            // Update installation state
+            controllerPlugins.populatePluginLists();
+            PopulateListViewPlugins();
         }
 
         private bool AbortActionOverride()
@@ -313,16 +312,15 @@ namespace PluginManagerObs
             }
             if (AbortActionOverride()) { return; }
             ListViewItem lvi = listViewPlugins.SelectedItems[0];
-            Debug.WriteLine(lvi.Text);
-            if (controllerPlugins.uninstallPlugin(lvi.Text))
+            Debug.WriteLine("Plugin to remove: " + lvi.Text);
+            if (!controllerPlugins.uninstallPlugin(lvi.Text))
             {
-                listViewPlugins.Items.Clear();
-                PopulateListViewPlugins();
+                MessageBox.Show($"Failed to remove {lvi.Text}", "Unable to remove", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            else
-            {
-                MessageBox.Show($"Could not remove {lvi.Text}\nIs OBS running?", "Could not remove", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            listViewPlugins.Items.Clear();
+            // Update installation state
+            controllerPlugins.populatePluginLists();
+            PopulateListViewPlugins();
         }
 
         private void buttonMarkNotInstalled_Click(object sender, EventArgs e)
