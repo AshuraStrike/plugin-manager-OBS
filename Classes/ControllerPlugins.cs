@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.EntityFrameworkCore;
+using PluginManagerObs.Classes.ThemeManager;
 using PluginManagerObs.Models;
 using Tomlyn;
 
@@ -333,6 +334,15 @@ namespace PluginManagerObs.Classes
 
                 pluginsPath = (string)model["pluginspath"];
                 pluginsPath = pluginsPath.Replace('/', '\\');
+
+                if ((string)model["theme"] == "Light")
+                {
+                    ThemeManager.ThemeManager.CurrentTheme = Themes.Light;
+                }
+                else
+                {
+                    ThemeManager.ThemeManager.CurrentTheme = Themes.Dark;
+                }
                 return true;
             }
             return false;
@@ -342,7 +352,15 @@ namespace PluginManagerObs.Classes
         {
             string settings = "settings.tml";
             string toml = $"obspath = \"{obsPath.Path.Replace('\\', '/')}\"\n";
-            toml += $"pluginspath = \"{pluginsPath.Replace('\\', '/')}\"";
+            toml += $"pluginspath = \"{pluginsPath.Replace('\\', '/')}\"\n";
+            if (ThemeManager.ThemeManager.CurrentTheme == Themes.Light)
+            {
+                toml += "theme = \"Light\"";
+            }
+            else
+            {
+                toml += "theme = \"Dark\"";
+            }
 
             using (StreamWriter sw = new StreamWriter(settings))
             {

@@ -1,4 +1,5 @@
 using PluginManagerObs.Classes;
+using PluginManagerObs.Classes.ThemeManager;
 using PluginManagerObs.Models;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -64,6 +65,7 @@ namespace PluginManagerObs
                 controllerPlugins.populatePlugins();
                 PopulateListViewPlugins();
             }
+            ThemeManager.SetTheme(ThemeManager.CurrentTheme, this);
         }
 
         private void buttonReload_Click(object sender, EventArgs e)
@@ -232,6 +234,13 @@ namespace PluginManagerObs
         {
             panelDragnDrop.Visible = false;
             labelDrop.Visible = false;
+        }
+
+        private void pictureSwitchTheme_Click(object sender, EventArgs e)
+        {
+            var newTheme = ThemeManager.CurrentTheme == Themes.Light ? Themes.Dark : Themes.Light;
+            ThemeManager.SetTheme(newTheme, this);
+            controllerPlugins.savePaths();
         }
     }
 }

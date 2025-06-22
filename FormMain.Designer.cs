@@ -46,7 +46,9 @@
             labelSign = new Label();
             panelDragnDrop = new Panel();
             labelDrop = new Label();
+            pictureSwitchTheme = new PictureBox();
             panelDragnDrop.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureSwitchTheme).BeginInit();
             SuspendLayout();
             // 
             // buttonObsPath
@@ -165,7 +167,7 @@
             // labelSign
             // 
             labelSign.AutoSize = true;
-            labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic, GraphicsUnit.Point);
+            labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic);
             labelSign.Location = new Point(576, 544);
             labelSign.Name = "labelSign";
             labelSign.Size = new Size(126, 16);
@@ -189,13 +191,24 @@
             // labelDrop
             // 
             labelDrop.AutoSize = true;
-            labelDrop.Font = new Font("Consolas", 27.75F, FontStyle.Regular, GraphicsUnit.Point);
+            labelDrop.Font = new Font("Consolas", 27.75F);
             labelDrop.Location = new Point(128, 200);
             labelDrop.Name = "labelDrop";
             labelDrop.Size = new Size(339, 43);
             labelDrop.TabIndex = 0;
             labelDrop.Text = "Drop files here!";
             labelDrop.Visible = false;
+            // 
+            // pictureSwitchTheme
+            // 
+            pictureSwitchTheme.Image = Properties.Resources.contrast;
+            pictureSwitchTheme.Location = new Point(679, 12);
+            pictureSwitchTheme.Name = "pictureSwitchTheme";
+            pictureSwitchTheme.Size = new Size(23, 23);
+            pictureSwitchTheme.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureSwitchTheme.TabIndex = 14;
+            pictureSwitchTheme.TabStop = false;
+            pictureSwitchTheme.Click += pictureSwitchTheme_Click;
             // 
             // FormMain
             // 
@@ -204,6 +217,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlDarkDark;
             ClientSize = new Size(714, 566);
+            Controls.Add(pictureSwitchTheme);
             Controls.Add(panelDragnDrop);
             Controls.Add(labelSign);
             Controls.Add(buttonRemove);
@@ -227,6 +241,7 @@
             DragLeave += FormMain_DragLeave;
             panelDragnDrop.ResumeLayout(false);
             panelDragnDrop.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureSwitchTheme).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -250,5 +265,7 @@
         private ColumnHeader columnHeaderDate;
         private Panel panelDragnDrop;
         private Label labelDrop;
+        private Button buttonDark;
+        private PictureBox pictureSwitchTheme;
     }
 }
