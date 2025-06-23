@@ -32,7 +32,7 @@ At the main screen pick the location for your OBS installation, you'll get notif
 
 NOTE: You must pick the path that contains all of OBS's files and folders, not just the bin folder
 
-Now pick the one where your OBS plugins on zip format are
+Now pick the one where your OBS plugins on zip format are stored
 
 The program will read the files recognized as OBS plugins and show them in the list, then you can add or remove them one by one
 
@@ -40,7 +40,7 @@ NOTE: Program will not check if plugins supports your current platform, remember
 
 If a plugin is found in to be installed the app will show it's status as Installed an the date when you installed it
 
-Add and remove plugins from your OBS install path freely, remove will only remove them from the OBS path
+Add and remove plugins from your OBS install path freely, remove will only remove them from the OBS path, files in Plugins path will remain intact
 
 Plugins can be added by drag and drop on the plugin list, cancel releasing click outside the list
 

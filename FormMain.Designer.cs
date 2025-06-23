@@ -51,7 +51,9 @@
             labelWarnings = new Label();
             buttonMarkNotInstalled = new Button();
             labelOBSWarning = new Label();
+            pictureSwitchTheme = new PictureBox();
             panelDragnDrop.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureSwitchTheme).BeginInit();
             SuspendLayout();
             // 
             // buttonObsPath
@@ -174,7 +176,7 @@
             // labelSign
             // 
             labelSign.AutoSize = true;
-            labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic, GraphicsUnit.Point);
+            labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic);
             labelSign.Location = new Point(668, 365);
             labelSign.Name = "labelSign";
             labelSign.Size = new Size(126, 16);
@@ -198,7 +200,7 @@
             // labelDrop
             // 
             labelDrop.AutoSize = true;
-            labelDrop.Font = new Font("Consolas", 27.75F, FontStyle.Regular, GraphicsUnit.Point);
+            labelDrop.Font = new Font("Consolas", 27.75F);
             labelDrop.Location = new Point(130, 109);
             labelDrop.Name = "labelDrop";
             labelDrop.Size = new Size(339, 43);
@@ -245,6 +247,17 @@
             labelOBSWarning.Text = "Warning:\r\nAn elevated OBS installation is currently running. Unable to check whether it is the selected OBS path.";
             labelOBSWarning.Visible = false;
             // 
+            // pictureSwitchTheme
+            // 
+            pictureSwitchTheme.Image = Properties.Resources.contrast;
+            pictureSwitchTheme.Location = new Point(679, 12);
+            pictureSwitchTheme.Name = "pictureSwitchTheme";
+            pictureSwitchTheme.Size = new Size(23, 23);
+            pictureSwitchTheme.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureSwitchTheme.TabIndex = 14;
+            pictureSwitchTheme.TabStop = false;
+            pictureSwitchTheme.Click += pictureSwitchTheme_Click;
+            // 
             // FormMain
             // 
             AllowDrop = true;
@@ -252,6 +265,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ControlLight;
             ClientSize = new Size(825, 388);
+            Controls.Add(pictureSwitchTheme);
             Controls.Add(labelOBSWarning);
             Controls.Add(labelWarnings);
             Controls.Add(labelSign);
@@ -281,6 +295,7 @@
             KeyUp += FormMain_KeyUp;
             panelDragnDrop.ResumeLayout(false);
             panelDragnDrop.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureSwitchTheme).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -308,5 +323,7 @@
         private Label labelWarnings;
         private Button buttonMarkNotInstalled;
         private Label labelOBSWarning;
+        private Button buttonDark;
+        private PictureBox pictureSwitchTheme;
     }
 }

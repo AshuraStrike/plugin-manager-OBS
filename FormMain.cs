@@ -1,4 +1,5 @@
 using PluginManagerObs.Classes;
+using PluginManagerObs.Classes.ThemeManager;
 using PluginManagerObs.Models;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -75,6 +76,7 @@ namespace PluginManagerObs
                 buttonReload.PerformClick();
                 UpdatePluginActionButtonState();
             }
+            ThemeManager.SetTheme(ThemeManager.CurrentTheme, this);
         }
 
         private void buttonReload_Click(object sender, EventArgs e)
@@ -374,14 +376,14 @@ namespace PluginManagerObs
             labelDrop.Visible = true;
             labelDrop.ForeColor = Color.Black;
             labelDrop.Text = "Drop your files to copy!";
-            labelDrop.Location = new Point(60, 200);
+            labelDrop.Location = new Point(60, 109);
         }
 
         private void panelDragnDrop_DragLeave(object sender, EventArgs e)
         {
             labelDrop.ForeColor = Color.DarkRed;
             labelDrop.Text = "Drop to CANCEL";
-            labelDrop.Location = new Point(150, 200);
+            labelDrop.Location = new Point(150, 109);
         }
 
         private void FormMain_DragDrop(object sender, DragEventArgs e)
@@ -433,6 +435,13 @@ namespace PluginManagerObs
                 buttonAdd.Text = "Add Plugin";
                 buttonRemove.Text = "Remove Plugin";
             }
+        }
+
+        private void pictureSwitchTheme_Click(object sender, EventArgs e)
+        {
+            var newTheme = ThemeManager.CurrentTheme == Themes.Light ? Themes.Dark : Themes.Light;
+            ThemeManager.SetTheme(newTheme, this);
+            controllerPlugins.savePaths();
         }
     }
 }
