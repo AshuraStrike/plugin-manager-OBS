@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PluginManagerObs.Classes.ThemeManager
+﻿namespace PluginManagerObs.Classes.ThemeManager
 {
     public class Theme
     {
@@ -16,6 +10,11 @@ namespace PluginManagerObs.Classes.ThemeManager
         public Color TextBoxForeColor { get; set; }
         public Color ListViewBackColor { get; set; }
         public Color ListViewForeColor { get; set; }
+        public Color PluginStateColor_NOT_INSTALLED { get; set; }
+        public Color PluginStateColor_INSTALLED { get; set; }
+        public Color PluginStateColor_MANUALLY_INSTALLED { get; set; }
+        public Color PluginStateColor_FILES_PRESENT { get; set; }
+        public Color PluginStateColor_INSTALLED_MODIFIED { get; set; }
 
     }
 }

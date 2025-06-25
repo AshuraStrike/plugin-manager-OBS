@@ -1,35 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PluginManagerObs.Classes.ThemeManager
+﻿namespace PluginManagerObs.Classes.ThemeManager
 {
     public static class Themes
     {
         public static Theme Light = new Theme
         {
-            BackgroundColor = SystemColors.Control,
+            BackgroundColor = SystemColors.ControlLight,
             ForegroundColor = SystemColors.ControlText,
-            ButtonBackColor = SystemColors.Control,
+            ButtonBackColor = SystemColors.ControlLight,
             ButtonForeColor = SystemColors.ControlText,
-            TextBoxBackColor = SystemColors.Control,
+            TextBoxBackColor = Color.White,
             TextBoxForeColor = SystemColors.ControlText,
-            ListViewBackColor = SystemColors.Control,
-            ListViewForeColor = SystemColors.ControlText
+            ListViewBackColor = SystemColors.ControlLight,
+            ListViewForeColor = SystemColors.ControlText,
+            PluginStateColor_NOT_INSTALLED = Color.LightBlue,
+            PluginStateColor_INSTALLED = Color.Green,
+            PluginStateColor_MANUALLY_INSTALLED = Color.GreenYellow,
+            PluginStateColor_FILES_PRESENT = Color.Yellow,
+            PluginStateColor_INSTALLED_MODIFIED = Color.Crimson
         };
 
         public static Theme Dark = new Theme
         {
             BackgroundColor = SystemColors.ControlDarkDark,
             ForegroundColor = SystemColors.ControlText,
-            ButtonBackColor = Color.FromArgb(225,225,225),
+            ButtonBackColor = SystemColors.ControlLight,
             ButtonForeColor = SystemColors.ControlText,
             TextBoxBackColor = SystemColors.Control,
             TextBoxForeColor = SystemColors.ControlText,
             ListViewBackColor = SystemColors.ControlDark,
-            ListViewForeColor = SystemColors.ControlText
+            ListViewForeColor = SystemColors.ControlText,
+            PluginStateColor_NOT_INSTALLED = Color.RoyalBlue,
+            PluginStateColor_INSTALLED = Color.Green,
+            PluginStateColor_MANUALLY_INSTALLED = Color.SeaGreen,
+            PluginStateColor_FILES_PRESENT = Color.Orange,
+            PluginStateColor_INSTALLED_MODIFIED = Color.Firebrick
         };
     }
 }

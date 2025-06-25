@@ -3,9 +3,6 @@ using PluginManagerObs.Classes.ThemeManager;
 using PluginManagerObs.Models;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PluginManagerObs
 {
@@ -170,27 +167,27 @@ namespace PluginManagerObs
                 {
                     case PluginInstallationType.NOT_INSTALLED:
                         status = "Not Installed";
-                        bgColor = Color.FromKnownColor(KnownColor.LightBlue);
+                        bgColor = ThemeManager.CurrentTheme.PluginStateColor_NOT_INSTALLED;
                         break;
                     case PluginInstallationType.INSTALLED:
                         status = "Installed";
-                        bgColor = Color.FromKnownColor(KnownColor.Green);
+                        bgColor = ThemeManager.CurrentTheme.PluginStateColor_INSTALLED;
                         break;
                     case PluginInstallationType.MANUALLY_INSTALLED:
                         status = "Manually Installed";
-                        bgColor = Color.FromKnownColor(KnownColor.GreenYellow);
+                        bgColor = ThemeManager.CurrentTheme.PluginStateColor_MANUALLY_INSTALLED;
                         break;
                     case PluginInstallationType.FILES_PRESENT:
                         status = "Files present";
-                        bgColor = Color.FromKnownColor(KnownColor.Yellow);
+                        bgColor = ThemeManager.CurrentTheme.PluginStateColor_FILES_PRESENT;
                         break;
                     case PluginInstallationType.INSTALLED_MODIFIED:
                         status = "Installed - Modified";
-                        bgColor = Color.FromKnownColor(KnownColor.Crimson);
+                        bgColor = ThemeManager.CurrentTheme.PluginStateColor_INSTALLED_MODIFIED;
                         break;
                     default:
                         status = "Unknown";
-                        bgColor = Color.FromKnownColor(KnownColor.Control);
+                        bgColor = ThemeManager.CurrentTheme.ListViewBackColor;
                         break;
                 }
 

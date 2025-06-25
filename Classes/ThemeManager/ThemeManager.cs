@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PluginManagerObs.Classes.ThemeManager
+﻿namespace PluginManagerObs.Classes.ThemeManager
 {
     internal class ThemeManager
     {
@@ -27,16 +21,54 @@ namespace PluginManagerObs.Classes.ThemeManager
                     child.BackColor = CurrentTheme.TextBoxBackColor;
                     child.ForeColor = CurrentTheme.TextBoxForeColor;
                 }
-                else if (child is ListView || child is Panel)
+                else if (child is Panel)
                 {
                     child.BackColor = CurrentTheme.ListViewBackColor;
                     child.ForeColor = CurrentTheme.ListViewForeColor;
+                }
+                else if (child is ListView)
+                {
+                    child.BackColor = CurrentTheme.ListViewBackColor;
+                    child.ForeColor = CurrentTheme.ListViewForeColor;
+
+                    ListView lv = child as ListView;
+                    foreach (ListViewItem item in lv.Items)
+                    {
+                        var subItem = item.SubItems[1];
+                        subItem.BackColor = getBackColorByInstallState(subItem.Text);
+                    }
                 }
                 else
                 {
                     ApplyTheme(child);
                 }
             }
+        }
+
+        private static Color getBackColorByInstallState(string text)
+        {
+            Color color = SystemColors.Control;
+            switch (text)
+            {
+                case "Not Installed":
+                    color = ThemeManager.CurrentTheme.PluginStateColor_NOT_INSTALLED;
+                    break;
+                case "Installed":
+                    color = ThemeManager.CurrentTheme.PluginStateColor_INSTALLED;
+                    break;
+                case "Manually Installed":
+                    color = ThemeManager.CurrentTheme.PluginStateColor_MANUALLY_INSTALLED;
+                    break;
+                case "Files present":
+                    color = ThemeManager.CurrentTheme.PluginStateColor_FILES_PRESENT;
+                    break;
+                case "Installed - Modified":
+                    color = ThemeManager.CurrentTheme.PluginStateColor_INSTALLED_MODIFIED;
+                    break;
+                default:
+                    break;
+            }
+            return color;
         }
 
         public static void SetTheme(Theme theme, Control root)
