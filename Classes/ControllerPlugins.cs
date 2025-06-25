@@ -1,15 +1,10 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
-using System.Linq.Expressions;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using PluginManagerObs.Classes.ThemeManager;
 using PluginManagerObs.Models;
 using Tomlyn;
+using Tomlyn.Model;
 
 namespace PluginManagerObs.Classes
 {
@@ -491,28 +486,47 @@ namespace PluginManagerObs.Classes
         public bool loadPaths()
         {
             string settings = "settings.tml";
-            string toml = string.Empty;
+            TomlTable tomlTable = new TomlTable();
+
             if (File.Exists(settings))
             {
+                string toml = string.Empty;
                 using (StreamReader sr = new StreamReader(settings))
                 {
                     toml = sr.ReadToEnd();
                 }
-                var model = Toml.ToModel(toml);
+                tomlTable = Toml.ToModel(toml);
+            }
 
-                string obsPath_ = (string)model["obspath"];
-                obsPath_ = obsPath_.Replace('/', '\\');
-
-                setObsPath(obsPath_);
-
-                pluginsPath = (string)model["pluginspath"];
-                pluginsPath = pluginsPath.Replace('/', '\\');
-                if (!System.IO.Directory.Exists(pluginsPath))
+            if (!isNullOrEmpty(tomlTable))
+            {
+                object obsPath_;
+                tomlTable.TryGetValue("obspath", out obsPath_);
+                if (!isNullOrEmpty(obsPath_))
                 {
-                    pluginsPath = string.Empty;
+                    string stringObsPath_ = obsPath_.ToString().Replace('/', '\\');
+                    setObsPath(stringObsPath_);
                 }
 
-                if ((string)model["theme"] == "Light")
+                object pluginsPath_;
+                tomlTable.TryGetValue("pluginspath", out pluginsPath_);
+                if (!isNullOrEmpty(pluginsPath_))
+                {
+                    string stringPluginsPath_ = pluginsPath_.ToString().Replace('/', '\\');
+
+                    if (!Directory.Exists(stringPluginsPath_))
+                    {
+                        pluginsPath = string.Empty;
+                    }
+                    else
+                    {
+                        pluginsPath = stringPluginsPath_;
+                    }
+                }
+
+                object themeValue;
+                tomlTable.TryGetValue("theme", out themeValue);
+                if (!isNullOrEmpty(themeValue) && themeValue.ToString() == "Light")
                 {
                     ThemeManager.ThemeManager.CurrentTheme = Themes.Light;
                 }
@@ -554,6 +568,16 @@ namespace PluginManagerObs.Classes
         }
 
         public string getObsPath() => obsPath.Path;
+
+        public Boolean isNullOrEmpty(object o)
+        {
+            Boolean nullOrEmpty = true;
+            if (o != null && o.ToString() != string.Empty)
+            {
+                nullOrEmpty = false;
+            }
+            return nullOrEmpty;
+        }
     }
 }
 
