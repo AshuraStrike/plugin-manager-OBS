@@ -177,11 +177,11 @@
             // 
             labelSign.AutoSize = true;
             labelSign.Font = new Font("Courier New", 9F, FontStyle.Italic);
-            labelSign.Location = new Point(668, 365);
+            labelSign.Location = new Point(687, 363);
             labelSign.Name = "labelSign";
             labelSign.Size = new Size(126, 16);
             labelSign.TabIndex = 10;
-            labelSign.Text = "AshuraStrike 2023";
+            labelSign.Text = "AshuraStrike 2025";
             // 
             // panelDragnDrop
             // 
@@ -250,7 +250,7 @@
             // pictureSwitchTheme
             // 
             pictureSwitchTheme.Image = Properties.Resources.contrast;
-            pictureSwitchTheme.Location = new Point(679, 12);
+            pictureSwitchTheme.Location = new Point(790, 12);
             pictureSwitchTheme.Name = "pictureSwitchTheme";
             pictureSwitchTheme.Size = new Size(23, 23);
             pictureSwitchTheme.SizeMode = PictureBoxSizeMode.Zoom;
@@ -323,7 +323,6 @@
         private Label labelWarnings;
         private Button buttonMarkNotInstalled;
         private Label labelOBSWarning;
-        private Button buttonDark;
         private PictureBox pictureSwitchTheme;
     }
 }
