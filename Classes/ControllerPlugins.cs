@@ -578,6 +578,23 @@ namespace PluginManagerObs.Classes
             }
             return nullOrEmpty;
         }
+
+        public Boolean canWriteToPath()
+        {
+            Boolean canWriteToPath = true;
+            string filePath = $"{obsPath.Path}.test";
+            try
+            {
+                File.WriteAllText(filePath, "Success!");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                canWriteToPath = false;
+                Debug.WriteLine($"Set path exception: {ex}");
+            }
+            if(File.Exists(filePath)){ File.Delete(filePath); }
+            return canWriteToPath;
+        }
     }
 }
 

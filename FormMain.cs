@@ -43,6 +43,11 @@ namespace PluginManagerObs
                         controllerPlugins.setObsPath(selectedPath);
                     }
                 }
+                if (!controllerPlugins.canWriteToPath())
+                {
+                    MessageBox.Show($"Failed to use path {selectedPath}\nTry to run with admin privileges", "Not enough privileges for this folder!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 if (controllerPlugins.pluginsPath != string.Empty)
                 {
                     buttonReload.PerformClick();
